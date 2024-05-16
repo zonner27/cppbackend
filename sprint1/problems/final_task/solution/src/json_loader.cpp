@@ -14,7 +14,7 @@ model::Game LoadGame(const std::filesystem::path& json_path) {
 
     std::ifstream file(json_path);
     if (!file.is_open()) {
-        std::cerr << "Не удалось открыть файл." << std::endl;
+        throw std::runtime_error("Failed to open file: " + json_path.string());
     }
 
     std::string jsonDataStr((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
@@ -22,55 +22,73 @@ model::Game LoadGame(const std::filesystem::path& json_path) {
     try {
         jsonData = json::parse(jsonDataStr);
     } catch (std::exception& e) {
-        std::cerr << "Failed to parse JSON: " << e.what() << std::endl;
+        throw std::runtime_error("Failed to parse JSON: " + std::string(e.what()));
     }
 
-    const auto& mapsArray = jsonData.as_object()["maps"].as_array();
+    const auto& mapsArray = jsonData.as_object()[constants::MAPS].as_array();
     for (const auto& mapData : mapsArray) {
-        std::string mapId = mapData.as_object().at("id").as_string().c_str();
-        std::string mapName = mapData.as_object().at("name").as_string().c_str();
+        std::string mapId = mapData.as_object().at(constants::ID).as_string().c_str();
+        std::string mapName = mapData.as_object().at(constants::NAME).as_string().c_str();
         model::Map map(model::Map::Id(mapId), mapName);
 
-        for (const auto& roadData : mapData.as_object().at("roads").as_array()) {
-            int x0 = roadData.as_object().at("x0").as_int64();
-            int y0 = roadData.as_object().at("y0").as_int64();
-            int x1 = roadData.as_object().contains("x1") ? roadData.as_object().at("x1").as_int64() : x0;
-            int y1 = roadData.as_object().contains("y1") ? roadData.as_object().at("y1").as_int64() : y0;
-
-            model::Point start{x0, y0};
-            if (x0 == x1) {
-                map.AddRoad(model::Road(model::Road::VERTICAL, start, y1));
-            } else if (y0 == y1) {
-                map.AddRoad(model::Road(model::Road::HORIZONTAL, start, x1));
-            } else {
-                std::cerr << "Invalid road data in map: " << mapId << std::endl;
-            }
-        }
-
-        for (const auto& buildingData : mapData.as_object().at("buildings").as_array()) {
-            int x = buildingData.as_object().at("x").as_int64();
-            int y = buildingData.as_object().at("y").as_int64();
-            int w = buildingData.as_object().at("w").as_int64();
-            int h = buildingData.as_object().at("h").as_int64();
-
-            map.AddBuilding(model::Building({{x, y}, {w, h}}));
-        }
-
-        for (const auto& officeData : mapData.as_object().at("offices").as_array()) {
-            std::string officeIdString = officeData.as_object().at("id").as_string().c_str();
-            model::Office::Id officeId(officeIdString);
-            int x = officeData.as_object().at("x").as_int64();
-            int y = officeData.as_object().at("y").as_int64();
-            int offsetX = officeData.as_object().at("offsetX").as_int64();
-            int offsetY = officeData.as_object().at("offsetY").as_int64();
-
-            map.AddOffice(model::Office(officeId, {x, y}, {offsetX, offsetY}));
+        try {
+            ParseRoads(mapData, map);
+            ParseBuildings(mapData, map);
+            ParseOffices(mapData, map);
+        } catch (const std::exception& e) {
+            throw std::runtime_error("Error while parsing map data in map: " + mapId + ": " + std::string(e.what()));
         }
 
         game.AddMap(map);
     }
 
     return game;
+}
+
+void ParseRoads(const json::value& mapData, model::Map& map) {
+    const auto& roadsArray = mapData.as_object().at(constants::ROADS).as_array();
+    for (const auto& roadData : roadsArray) {
+        int x0 = roadData.as_object().at(constants::X0).as_int64();
+        int y0 = roadData.as_object().at(constants::Y0).as_int64();
+        int x1 = roadData.as_object().contains(constants::X1) ? roadData.as_object().at(constants::X1).as_int64() : x0;
+        int y1 = roadData.as_object().contains(constants::Y1) ? roadData.as_object().at(constants::Y1).as_int64() : y0;
+
+        model::Point start{x0, y0};
+        if (x0 == x1) {
+            map.AddRoad(model::Road(model::Road::VERTICAL, start, y1));
+        } else if (y0 == y1) {
+            map.AddRoad(model::Road(model::Road::HORIZONTAL, start, x1));
+        } else {
+            assert(false && "Invalid road data in map");
+            throw std::runtime_error("Invalid road data in map");
+        }
+    }
+}
+
+void ParseBuildings(const json::value& mapData, model::Map& map) {
+    const auto& buildingsArray = mapData.as_object().at(constants::BUILDINGS).as_array();
+    for (const auto& buildingData : buildingsArray) {
+        int x = buildingData.as_object().at(constants::X).as_int64();
+        int y = buildingData.as_object().at(constants::Y).as_int64();
+        int w = buildingData.as_object().at(constants::W).as_int64();
+        int h = buildingData.as_object().at(constants::H).as_int64();
+
+        map.AddBuilding(model::Building({{x, y}, {w, h}}));
+    }
+}
+
+void ParseOffices(const json::value& mapData, model::Map& map) {
+    const auto& officesArray = mapData.as_object().at(constants::OFFICES).as_array();
+    for (const auto& officeData : officesArray) {
+        std::string officeIdString = officeData.as_object().at(constants::ID).as_string().c_str();
+        model::Office::Id officeId(officeIdString);
+        int x = officeData.as_object().at(constants::X).as_int64();
+        int y = officeData.as_object().at(constants::Y).as_int64();
+        int offsetX = officeData.as_object().at(constants::OFFSET_X).as_int64();
+        int offsetY = officeData.as_object().at(constants::OFFSET_Y).as_int64();
+
+        map.AddOffice(model::Office(officeId, {x, y}, {offsetX, offsetY}));
+    }
 }
 
 }

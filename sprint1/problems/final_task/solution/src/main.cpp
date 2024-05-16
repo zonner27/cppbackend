@@ -36,7 +36,13 @@ int main(int argc, const char* argv[]) {
     }
     try {
         // 1. Загружаем карту из файла и построить модель игры
-        model::Game game = json_loader::LoadGame(argv[1]);
+        model::Game game;
+        try {
+            game = json_loader::LoadGame(argv[1]);
+        } catch (const std::exception& e) {
+            std::cerr << "Error: " << e.what() << std::endl;
+            return EXIT_FAILURE;
+        }
 
         // 2. Инициализируем io_context
         const unsigned num_threads = std::thread::hardware_concurrency();
