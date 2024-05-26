@@ -1,5 +1,5 @@
 #include "sdk.h"
-//
+
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/signal_set.hpp>
 #include <iostream>
@@ -14,7 +14,6 @@ namespace sys = boost::system;
 namespace http = boost::beast::http;
 
 namespace {
-////////
 // Запускает функцию fn на n потоках, включая текущий
 template <typename Fn>
 void RunWorkers(unsigned n, const Fn& fn) {
@@ -37,8 +36,13 @@ int main(int argc, const char* argv[]) {
     }
     try {
         // 1. Загружаем карту из файла и построить модель игры
-        model::Game game = json_loader::LoadGame(argv[1]);
-        //std::cout << argv[1] << std::endl;
+        model::Game game;
+        try {
+            game = json_loader::LoadGame(argv[1]);
+        } catch (const std::exception& e) {
+            std::cerr << "Error: " << e.what() << std::endl;
+            return EXIT_FAILURE;
+        }
 
         // 2. Инициализируем io_context
         const unsigned num_threads = std::thread::hardware_concurrency();

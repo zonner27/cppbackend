@@ -1,6 +1,6 @@
 #pragma once
 #include "sdk.h"
-//
+
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/beast/core.hpp>
@@ -16,14 +16,7 @@ namespace http = beast::http;
 using namespace std::literals;
 namespace sys = boost::system;
 
-
-//void ReportError(beast::error_code ec, std::string_view what) {
-//    std::cerr << what << ": "sv << ec.message() << std::endl;
-//}
-
-
 class SessionBase {
-    // Напишите недостающий код, используя информацию из урока
 protected:
     using HttpRequest = http::request<http::string_body>;
     ~SessionBase() = default;
@@ -48,7 +41,6 @@ public:
     SessionBase& operator=(const SessionBase&) = delete;
 
     void Run();
-
 
 private:
     // tcp_stream содержит внутри себя сокет и добавляет поддержку таймаутов
@@ -83,8 +75,8 @@ private:
         stream_.expires_after(30s);
         // Считываем request_ из stream_, используя buffer_ для хранения считанных данных
         http::async_read(stream_, buffer_, request_,
-                         // По окончании операции будет вызван метод OnRead
-                         beast::bind_front_handler(&SessionBase::OnRead, GetSharedThis()));
+        // По окончании операции будет вызван метод OnRead
+        beast::bind_front_handler(&SessionBase::OnRead, GetSharedThis()));
     }
 
     void OnRead(beast::error_code ec, [[maybe_unused]] std::size_t bytes_read) {
@@ -101,6 +93,9 @@ private:
     void Close() {
            beast::error_code ec;
            stream_.socket().shutdown(tcp::socket::shutdown_send, ec);
+           if (ec) {
+               return ReportError(ec, "shutdown"sv);
+            }
        }
 
     // Обработку запроса делегируем подклассу
@@ -110,7 +105,6 @@ private:
 
 template <typename RequestHandler>
 class Session : public SessionBase, public std::enable_shared_from_this<Session<RequestHandler>> {
-    // Напишите недостающий код, используя информацию из урока
 
 public:
     template <typename Handler>
@@ -137,7 +131,6 @@ private:
 
 template <typename RequestHandler>
 class Listener : public std::enable_shared_from_this<Listener<RequestHandler>> {
-    // Напишите недостающий код, используя информацию из урока
 public:
     template <typename Handler>
     Listener(net::io_context& ioc, const tcp::endpoint& endpoint, Handler&& request_handler)
@@ -158,20 +151,7 @@ public:
         // Переводим acceptor в состояние, в котором он способен принимать новые соединения
         // Благодаря этому новые подключения будут помещаться в очередь ожидающих соединений
         acceptor_.listen(net::socket_base::max_listen_connections);
-
     }
-
-//    net::io_context ioc;
-//    // acceptor будет вызывать свои функции-обработчики последовательно внутри strand
-//    tcp::acceptor acceptor{net::make_strand(ioc)};
-
-//    acceptor.async_accept(
-//        net::make_strand(ioc), // socket будет вызывать свои операции в своём strand
-//        [](beast::error_code ec, tcp::socket socket) {
-//            /* Если ec не содержит ошибки, через socket можно обмениваться данными */
-//        });
-//    auto handler = boost::beast::bind_front_handler(SomeFunc, arg1, arg2);
-//    handler(arg3, arg4, arg5); // Вызовет SomeFunc(arg1, arg2, arg3, arg4, arg5);
 
     void Run() {
         DoAccept();
@@ -184,7 +164,6 @@ private:
     void ReportError(beast::error_code ec, std::string_view what) {
         std::cerr << what << ": "sv << ec.message() << std::endl;
     }
-
 
     void DoAccept() {
         acceptor_.async_accept(

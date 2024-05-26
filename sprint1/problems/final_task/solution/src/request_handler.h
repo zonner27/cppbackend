@@ -1,18 +1,16 @@
 #pragma once
 #include "http_server.h"
 #include "model.h"
+#include "constants.h"
 
 #include <boost/json.hpp>
 
 namespace http_handler {
 namespace beast = boost::beast;
 namespace http = beast::http;
-
-//// Запрос, тело которого представлено в виде строки
-using StringRequest = http::request<http::string_body>;
-////// Ответ, тело которого представлено в виде строки
-using StringResponse = http::response<http::string_body>;
 namespace json = boost::json;
+
+using StringResponse = http::response<http::string_body>;
 
 class RequestHandler {
 public:
@@ -32,8 +30,8 @@ public:
 
             for (const auto& map : game_.GetMaps()) {
                 json::object mapObject;
-                mapObject["id"] = json::string(*map.GetId());
-                mapObject["name"] = json::string(map.GetName());
+                mapObject[constants::ID] = json::string(*map.GetId());
+                mapObject[constants::NAME] = json::string(map.GetName());
                 jsonArray.push_back(std::move(mapObject));
             }
 
@@ -47,52 +45,51 @@ public:
 
          if (req.method() == http::verb::get && req.target().starts_with("/api/v1/maps/")) {
             std::string mapIdstr = req.target().to_string().substr(13);
-            //std::cout << "mapId = " << mapIdstr << std::endl;
 
             model::Map::Id mapId = model::Map::Id(mapIdstr);
             const model::Map* map = game_.FindMap(mapId);
 
             if (map != nullptr) {
                 json::object mapJson;
-                mapJson["id"] = json::string(*map->GetId());
-                mapJson["name"] = json::string(map->GetName());
+                mapJson[constants::ID] = json::string(*map->GetId());
+                mapJson[constants::NAME] = json::string(map->GetName());
 
                 json::array roadsJsonArray;
                 for (const auto& road : map->GetRoads()) {
                     json::object roadJson;
-                    roadJson["x0"] = road.GetStart().x;
-                    roadJson["y0"] = road.GetStart().y;
+                    roadJson[constants::X0] = road.GetStart().x;
+                    roadJson[constants::Y0] = road.GetStart().y;
                     if (road.IsHorizontal()) {
-                        roadJson["x1"] = road.GetEnd().x;
+                        roadJson[constants::X1] = road.GetEnd().x;
                     } else {
-                        roadJson["y1"] = road.GetEnd().y;
+                        roadJson[constants::Y1] = road.GetEnd().y;
                     }
                     roadsJsonArray.push_back(std::move(roadJson));
                 }
-                mapJson["roads"] = std::move(roadsJsonArray);
+                mapJson[constants::ROADS] = std::move(roadsJsonArray);
 
                 json::array buildingsJsonArray;
                 for (const auto& building : map->GetBuildings()) {
                     json::object buildingJson;
-                    buildingJson["x"] = building.GetBounds().position.x;
-                    buildingJson["y"] = building.GetBounds().position.y;
-                    buildingJson["w"] = building.GetBounds().size.width;
-                    buildingJson["h"] = building.GetBounds().size.height;
+                    buildingJson[constants::X] = building.GetBounds().position.x;
+                    buildingJson[constants::Y] = building.GetBounds().position.y;
+                    buildingJson[constants::W] = building.GetBounds().size.width;
+                    buildingJson[constants::H] = building.GetBounds().size.height;
                     buildingsJsonArray.push_back(std::move(buildingJson));
                 }
-                mapJson["buildings"] = std::move(buildingsJsonArray);
+                mapJson[constants::BUILDINGS] = std::move(buildingsJsonArray);
 
                 json::array officesJsonArray;
                 for (const auto& office : map->GetOffices()) {
                     json::object officeJson;
-                    officeJson["id"] = json::string(*office.GetId());
-                    officeJson["x"] = office.GetPosition().x;
-                    officeJson["y"] = office.GetPosition().y;
-                    officeJson["offsetX"] = office.GetOffset().dx;
-                    officeJson["offsetY"] = office.GetOffset().dy;
+                    officeJson[constants::ID] = json::string(*office.GetId());
+                    officeJson[constants::X] = office.GetPosition().x;
+                    officeJson[constants::Y] = office.GetPosition().y;
+                    officeJson[constants::OFFSET_X] = office.GetOffset().dx;
+                    officeJson[constants::OFFSET_Y] = office.GetOffset().dy;
                     officesJsonArray.push_back(std::move(officeJson));
                 }
-                mapJson["offices"] = std::move(officesJsonArray);
+                mapJson[constants::OFFICES] = std::move(officesJsonArray);
 
                 StringResponse response;
                 response.result(http::status::ok);
@@ -102,10 +99,9 @@ public:
                 return;
 
             } else {
-                //std::cout << "Map not found." << std::endl;
                 boost::json::object errorObject;
-                errorObject["code"] = "mapNotFound";
-                errorObject["message"] = "Map not found";
+                errorObject[constants::CODE] = "mapNotFound";
+                errorObject[constants::MESSAGE] = "Map not found";
 
                 StringResponse response;
                 response.result(http::status::not_found);
@@ -114,12 +110,11 @@ public:
                 send(std::move(response));
                 return;
             }
-
          }
 
          boost::json::object errorObject;
-         errorObject["code"] = "badRequest";
-         errorObject["message"] = "Bad request";
+         errorObject[constants::CODE] = "badRequest";
+         errorObject[constants::MESSAGE] = "Bad request";
 
          StringResponse response;
          response.result(http::status::bad_request);
