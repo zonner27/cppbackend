@@ -75,7 +75,8 @@ public:
     // синхронизацию.
     void SetTimestamp(std::chrono::system_clock::time_point ts) {
         std::lock_guard<std::mutex> lock(mutex_);
-        manual_ts_ = ts - std::chrono::hours(3);
+        //manual_ts_ = ts - std::chrono::hours(3);
+        manual_ts_ = ts;
         if (GetFileTimeStamp() != current_time) {
             log_file_.close();
             open_file();
