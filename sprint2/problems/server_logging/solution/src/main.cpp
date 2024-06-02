@@ -40,12 +40,12 @@ int main(int argc, const char* argv[]) {
         return EXIT_FAILURE;
     }
     fs::path base_path = argv[0];
-    base_path = base_path.parent_path() / "../../";
+    base_path = base_path.parent_path() / "../../"s;
     fs::path json_path = argv[1];
     fs::path static_path = argv[2];
 
     if (!files_path::IsSubPath(static_path, base_path)) {
-        std::cerr << "The folder "sv << argv[2] << " is not in the program directory" << std::endl;
+        std::cerr << "The folder "sv << argv[2] << " is not in the program directory"sv << std::endl;
         return EXIT_FAILURE;
     }
     try {
@@ -68,8 +68,8 @@ int main(int argc, const char* argv[]) {
         signals.async_wait([&ioc](const sys::error_code& ec, [[maybe_unused]] int signal_number) {
             if (!ec) {
                 ioc.stop();
-                json::value custom_data = json::object{{"code", 0}};
-                BOOST_LOG_TRIVIAL(info) << logging::add_value(additional_data, custom_data) << "server exited";
+                json::value custom_data = json::object{{"code"s, 0}};
+                BOOST_LOG_TRIVIAL(info) << logging::add_value(additional_data, custom_data) << "server exited"sv;
             }
         });
 
@@ -86,10 +86,10 @@ int main(int argc, const char* argv[]) {
 
         // Эта надпись сообщает тестам о том, что сервер запущен и готов обрабатывать запросы std::cout << "Server has started..."sv << std::endl
         json::value custom_data = json::object{
-                {"port", port},
-                {"address", address.to_string()}
+                {"port"s, port},
+                {"address"s, address.to_string()}
         };
-        BOOST_LOG_TRIVIAL(info) << logging::add_value(additional_data, custom_data) << "server started";
+        BOOST_LOG_TRIVIAL(info) << logging::add_value(additional_data, custom_data) << "server started"sv;
 
         // 6. Запускаем обработку асинхронных операций
         RunWorkers(std::max(1u, num_threads), [&ioc] {
@@ -97,10 +97,10 @@ int main(int argc, const char* argv[]) {
         });
     } catch (const std::exception& ex) {
         json::value custom_data = json::object{
-                {"code", EXIT_FAILURE},
-                {"exception", ex.what()}
+                {"code"s, EXIT_FAILURE},
+                {"exception"s, ex.what()}
         };
-        BOOST_LOG_TRIVIAL(info) << logging::add_value(additional_data, custom_data) << "server exited";
+        BOOST_LOG_TRIVIAL(fatal) << logging::add_value(additional_data, custom_data) << "server exited"sv;
         return EXIT_FAILURE;
     }
 }

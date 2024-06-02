@@ -34,6 +34,7 @@ void logger_init()
 
     logging::add_console_log(
         std::clog,
-        keywords::format = &json_formatter
+        keywords::format = &json_formatter,
+        keywords::auto_flush = true
     );
 }

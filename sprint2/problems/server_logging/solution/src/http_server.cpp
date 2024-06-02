@@ -5,11 +5,11 @@ namespace http_server {
 
 void SessionBase::ReportError(beast::error_code ec, std::string_view what) {
     json::value custom_data = json::object{
-            {"code", ec.value()},
-            {"text", ec.message()},
-            {"where", what}
+            {"code"s, ec.value()},
+            {"text"s, ec.message()},
+            {"where"s, what}
     };
-    BOOST_LOG_TRIVIAL(info) << logging::add_value(additional_data, custom_data) << "error";
+    BOOST_LOG_TRIVIAL(error) << logging::add_value(additional_data, custom_data) << "error"sv;
 }
 
 void SessionBase::Run() {

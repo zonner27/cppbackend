@@ -18,6 +18,7 @@ RUN mkdir /app/build && cd /app/build && \
 COPY ./src /app/src
 COPY ./data /app/data
 COPY ./static /app/static
+
 COPY CMakeLists.txt /app/
 
 RUN cd /app/build && \
