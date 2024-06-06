@@ -36,6 +36,8 @@ add_executable(game_server
         src/streamadapter.h
         src/logger.h
         src/logger.cpp
+        src/players.h
+        src/players.cpp
 )
 target_include_directories(game_server PRIVATE CONAN_PKG::boost)
 target_link_libraries(game_server 			

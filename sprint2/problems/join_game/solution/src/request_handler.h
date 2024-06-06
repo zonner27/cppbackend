@@ -5,6 +5,7 @@
 #include "files.h"
 #include "streamadapter.h"
 #include "logger.h"
+#include "players.h"
 
 #include <boost/json.hpp>
 #include <boost/beast.hpp>
@@ -34,11 +35,13 @@ protected:
     model::Game& game_;
     fs::path static_path_;
 
+
     template <typename Send>
     void sendJsonResponse(const json::value& jsonResponse, Send&& send) {
         StringResponse response;
         response.result(http::status::ok);
         response.set(http::field::content_type, "application/json");
+        response.set(http::field::cache_control, "no-cache");
         response.body() = boost::json::serialize(jsonResponse);
         send(std::move(response));
     }
@@ -52,6 +55,7 @@ protected:
         StringResponse response;
         response.result(status);
         response.set(http::field::content_type, "application/json");
+        response.set(http::field::cache_control, "no-cache");
         response.body() = boost::json::serialize(errorObject);
         send(std::move(response));
     }
@@ -90,8 +94,8 @@ class ApiRequestHandler : public BaseRequestHandler {
 public:
     using Strand = net::strand<net::io_context::executor_type>;
 
-    explicit ApiRequestHandler(model::Game& game, fs::path static_path,  Strand& api_strand) //net::io_context& ioc,
-            : BaseRequestHandler(game, static_path), api_strand_{api_strand} {}
+    explicit ApiRequestHandler(model::Game& game, fs::path static_path,  Strand& api_strand, app::PlayerTokens& playerTokens) //net::io_context& ioc,
+            : BaseRequestHandler(game, static_path), api_strand_{api_strand}, playerTokens_{playerTokens} {}
 
     using BaseRequestHandler::BaseRequestHandler;
 
@@ -102,6 +106,8 @@ public:
                 handleGetMapsRequest(std::forward<Send>(send));
             } else if (req.method() == http::verb::get && req.target().starts_with("/api/v1/maps/")) {
                 handleGetMapByIdRequest(req.target().to_string().substr(13), std::forward<Send>(send));
+            } else if (req.target() == "/api/v1/game/join") {                       //&& req.method() == http::verb::post
+                handleJoinGameRequest(req, std::forward<Send>(send));
             } else {
                 sendErrorResponse("badRequest", "Bad request", http::status::bad_request, std::forward<Send>(send));
             }
@@ -110,6 +116,7 @@ public:
 
 private:
     Strand& api_strand_;
+    app::PlayerTokens& playerTokens_;
 
     template <typename Send>
     void handleGetMapsRequest(Send&& send) {
@@ -136,6 +143,51 @@ private:
             sendErrorResponse("mapNotFound", "Map not found", http::status::not_found, std::forward<Send>(send));
         }
     }
+
+    template <typename Send>
+        void handleJoinGameRequest(const http::request<http::string_body>& req, Send&& send) {
+            if (req.method() != http::verb::post) {
+                sendErrorResponse("invalidMethod", "Only POST method is expected", http::status::method_not_allowed, std::forward<Send>(send));
+                return;
+            }
+
+            if (req[http::field::content_type] != "application/json") {
+                sendErrorResponse("invalidArgument", "Invalid Content-Type", http::status::bad_request, std::forward<Send>(send));
+                return;
+            }
+
+            try {
+                auto body = json::parse(req.body());
+                auto userName = body.at("userName").as_string();
+                auto mapId = body.at("mapId").as_string();
+
+                if (userName.empty()) {
+                    sendErrorResponse("invalidArgument", "Invalid name", http::status::bad_request, std::forward<Send>(send));
+                    return;
+                }
+
+                model::Map::Id mapIdObj{std::string{mapId}};
+                const model::Map* map = game_.FindMap(mapIdObj);
+                if (!map) {
+                    sendErrorResponse("mapNotFound", "Map not found", http::status::not_found, std::forward<Send>(send));
+                    return;
+                }
+
+                app::Player player(0);
+
+                app::Token authToken = playerTokens_.AddPlayer(player);
+                uint32_t playerId = player.GetPlayerId();
+
+                json::object responseBody = {
+                    {"authToken", *authToken},
+                    {"playerId", playerId}
+                };
+
+                sendJsonResponse(responseBody, std::forward<Send>(send));
+            } catch (const std::exception& e) {
+                sendErrorResponse("invalidArgument", "Join game request parse error", http::status::bad_request, std::forward<Send>(send));
+            }
+        }
 
     json::object createMapJson(const model::Map& map);
 };

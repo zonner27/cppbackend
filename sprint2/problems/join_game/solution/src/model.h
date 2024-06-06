@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "tagged.h"
@@ -167,14 +168,6 @@ private:
     Offices offices_;
 };
 
-class GameSession {
-public:
-
-private:
-    //dogs* список собак чтобы имена не повторялись выбрать контейнер
-    //maps*  ссылка на карту
-};
-
 //Алгоритм добавления собаки в игровой сеанс будет выглядеть так.
 //Найти игровой сеанс, соответствующий карте, на которой хочет играть клиент.
 //Внутри игрового сеанса добавить нового пса с указанным именем и сгенерированным id.
@@ -185,6 +178,16 @@ private:
     std::string name_;
     std::uint64_t id;
 };
+
+class GameSession {
+public:
+
+private:
+    std::unordered_set<Dog*> dogs_;
+    Map* map_;
+};
+
+
 
 class Game {
 public:
@@ -210,5 +213,7 @@ private:
     std::vector<Map> maps_;
     MapIdToIndex map_id_to_index_;
 };
+
+
 
 }  // namespace model
