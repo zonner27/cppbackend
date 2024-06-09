@@ -47,7 +47,8 @@ protected:
     }
 
     template <typename Send>
-    void sendErrorResponse(const std::string& code, const std::string& message, http::status status, Send&& send) {
+    void sendErrorResponse(const std::string& code, const std::string& message, http::status status, Send&& send,
+                           const std::string& allowMethods = "GET, HEAD, OPTIONS") {
         boost::json::object errorObject;
         errorObject["code"] = code;
         errorObject["message"] = message;
@@ -56,6 +57,9 @@ protected:
         response.result(status);
         response.set(http::field::content_type, "application/json");
         response.set(http::field::cache_control, "no-cache");
+        if (status == http::status::method_not_allowed) {
+            response.set(http::field::allow, allowMethods);
+        }
         response.body() = boost::json::serialize(errorObject);
         send(std::move(response));
     }
@@ -94,8 +98,8 @@ class ApiRequestHandler : public BaseRequestHandler {
 public:
     using Strand = net::strand<net::io_context::executor_type>;
 
-    explicit ApiRequestHandler(model::Game& game, fs::path static_path,  Strand& api_strand, app::PlayerTokens& playerTokens) //net::io_context& ioc,
-            : BaseRequestHandler(game, static_path), api_strand_{api_strand}, playerTokens_{playerTokens} {}
+    explicit ApiRequestHandler(model::Game& game, fs::path static_path,  Strand& api_strand, app::PlayerTokens& playerTokens, app::Players& players) //net::io_context& ioc,
+            : BaseRequestHandler(game, static_path), api_strand_{api_strand}, playerTokens_{playerTokens}, players_{players} {}
 
     using BaseRequestHandler::BaseRequestHandler;
 
@@ -106,7 +110,9 @@ public:
                 handleGetMapsRequest(std::forward<Send>(send));
             } else if (req.method() == http::verb::get && req.target().starts_with("/api/v1/maps/")) {
                 handleGetMapByIdRequest(req.target().to_string().substr(13), std::forward<Send>(send));
-            } else if (req.target() == "/api/v1/game/join") {                       //&& req.method() == http::verb::post
+            } else if (req.target() == "/api/v1/game/players" ) {
+                handleGetPlayersRequest(req, std::forward<Send>(send));
+            } else if (req.target() == "/api/v1/game/join") {
                 handleJoinGameRequest(req, std::forward<Send>(send));
             } else {
                 sendErrorResponse("badRequest", "Bad request", http::status::bad_request, std::forward<Send>(send));
@@ -117,6 +123,7 @@ public:
 private:
     Strand& api_strand_;
     app::PlayerTokens& playerTokens_;
+    app::Players& players_;
 
     template <typename Send>
     void handleGetMapsRequest(Send&& send) {
@@ -145,49 +152,113 @@ private:
     }
 
     template <typename Send>
-        void handleJoinGameRequest(const http::request<http::string_body>& req, Send&& send) {
-            if (req.method() != http::verb::post) {
-                sendErrorResponse("invalidMethod", "Only POST method is expected", http::status::method_not_allowed, std::forward<Send>(send));
-                return;
-            }
-
-            if (req[http::field::content_type] != "application/json") {
-                sendErrorResponse("invalidArgument", "Invalid Content-Type", http::status::bad_request, std::forward<Send>(send));
-                return;
-            }
-
-            try {
-                auto body = json::parse(req.body());
-                auto userName = body.at("userName").as_string();
-                auto mapId = body.at("mapId").as_string();
-
-                if (userName.empty()) {
-                    sendErrorResponse("invalidArgument", "Invalid name", http::status::bad_request, std::forward<Send>(send));
-                    return;
-                }
-
-                model::Map::Id mapIdObj{std::string{mapId}};
-                const model::Map* map = game_.FindMap(mapIdObj);
-                if (!map) {
-                    sendErrorResponse("mapNotFound", "Map not found", http::status::not_found, std::forward<Send>(send));
-                    return;
-                }
-
-                app::Player player(0);
-
-                app::Token authToken = playerTokens_.AddPlayer(player);
-                uint32_t playerId = player.GetPlayerId();
-
-                json::object responseBody = {
-                    {"authToken", *authToken},
-                    {"playerId", playerId}
-                };
-
-                sendJsonResponse(responseBody, std::forward<Send>(send));
-            } catch (const std::exception& e) {
-                sendErrorResponse("invalidArgument", "Join game request parse error", http::status::bad_request, std::forward<Send>(send));
-            }
+    void handleJoinGameRequest(const http::request<http::string_body>& req, Send&& send) {
+        if (req.method() != http::verb::post) {
+            const std::string allowedMethods = "POST";
+            sendErrorResponse("invalidMethod", "Only POST method is expected", http::status::method_not_allowed, std::forward<Send>(send), allowedMethods);
+            return;
         }
+
+        if (req[http::field::content_type] != "application/json") {
+            sendErrorResponse("invalidArgument", "Invalid Content-Type", http::status::bad_request, std::forward<Send>(send));
+            return;
+        }
+
+        try {
+            auto body = json::parse(req.body());
+            std::string userName = body.at("userName").as_string().c_str();
+            std::string mapId = body.at("mapId").as_string().c_str();
+
+            model::Map::Id mapIdObj{mapId};
+            const model::Map* map = game_.FindMap(mapIdObj);
+
+            if (userName.empty()) {
+                sendErrorResponse("invalidArgument", "Invalid name", http::status::bad_request, std::forward<Send>(send));
+                return;
+            }
+
+            if (!map) {
+                sendErrorResponse("mapNotFound", "Map not found", http::status::not_found, std::forward<Send>(send));
+                return;
+            }
+
+            if (players_.FindByDogNameAndMapId(userName, mapId) != nullptr) {
+                sendErrorResponse("invalidArgument", "User with the same dog name on same map exists", http::status::bad_request, std::forward<Send>(send));
+                return;
+            }
+
+            std::shared_ptr<model::Dog> dog = std::make_shared<model::Dog>(userName);
+            //std::cout << "dog = " << dog->GetName() << " " << dog->GetId() << std::endl;
+            std::shared_ptr<model::GameSession> validSession = game_.FindValidSession(map);
+            validSession->AddDog(*dog);
+            //std::cout << "session dogs count = " << validSession->GetDogsCount() << "  map = " << validSession->GetMapName() << std::endl;
+
+            app::Player& player = players_.Add(dog.get(), validSession.get());
+            //std::cout << "player = dog = " << player.GetDog()->GetName() << std::endl;
+
+            app::Token authToken = playerTokens_.AddPlayer(player);
+            //std::cout << "authToken = " <<  *authToken << std::endl;
+            uint32_t playerId = player.GetPlayerId();
+            //std::cout << "player id = " << playerId << std::endl;
+
+            json::object responseBody = {
+                {"authToken", *authToken},
+                {"playerId", playerId}
+            };
+
+            sendJsonResponse(responseBody, std::forward<Send>(send));
+
+        } catch (const std::exception& e) {
+            sendErrorResponse("invalidArgument", "Join game request parse error", http::status::bad_request, std::forward<Send>(send));
+        }
+    }
+
+    template <typename Send>
+    void handleGetPlayersRequest(const http::request<http::string_body>& req, Send&& send) {
+        if (req.method() != http::verb::get && req.method() != http::verb::head) {
+            const std::string allowedMethods = "GET, HEAD";
+            sendErrorResponse("invalidMethod", "Only POST method is expected", http::status::method_not_allowed, std::forward<Send>(send), allowedMethods);
+            return;
+        }
+
+        auto authHeader = req.find(http::field::authorization);
+
+        if (authHeader == req.end()) {
+            sendErrorResponse("invalidToken", "Authorization header is missing", http::status::unauthorized, std::forward<Send>(send));
+            return;
+        }
+        std::string tokenStr = authHeader->value().to_string();
+        const std::string bearerPrefix = "Bearer ";
+        if (tokenStr.rfind(bearerPrefix, 0) == 0) {
+            tokenStr = tokenStr.substr(bearerPrefix.size());
+        } else {
+            sendErrorResponse("invalidToken", "Invalid token format", http::status::unauthorized, std::forward<Send>(send));
+            return;
+        }
+
+        //std::cout << "auth = " << tokenStr << std::endl;
+        //playerTokens_.PrintToken();
+
+        app::Token token(tokenStr);
+        app::Player* player = playerTokens_.FindPlayerByToken(token);
+        if (!player) {
+            sendErrorResponse("unknownToken", "Player token has not been found", http::status::unauthorized, std::forward<Send>(send));
+            return;
+        }
+
+        model::GameSession* player_session = player->GetSession();
+        std::vector<model::Dog> dogsInSession = player_session->GetDogs();
+
+        boost::json::object response_json;
+
+        for (const model::Dog& dog : dogsInSession) {
+            //std::cout << "id = " << dog.GetId() << " name = " << dog.GetName() << std::endl;
+            boost::json::object dog_json;
+            dog_json["name"] = dog.GetName();
+            response_json[std::to_string(dog.GetId())] = dog_json;
+        }
+        sendJsonResponse(response_json, std::forward<Send>(send));
+    }
 
     json::object createMapJson(const model::Map& map);
 };

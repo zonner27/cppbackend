@@ -37,4 +37,6 @@ namespace constants {
         {".mp3", "audio/mpeg"}
     };
 
+    const uint32_t MAXPLAYERSINMAP = 20;
+
 }  // namespace constants

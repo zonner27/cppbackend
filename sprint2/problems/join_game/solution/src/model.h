@@ -2,9 +2,12 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <set>
 #include <vector>
+#include <memory>
 
 #include "tagged.h"
+#include "constants.h"
 
 namespace model {
 
@@ -171,20 +174,102 @@ private:
 //Алгоритм добавления собаки в игровой сеанс будет выглядеть так.
 //Найти игровой сеанс, соответствующий карте, на которой хочет играть клиент.
 //Внутри игрового сеанса добавить нового пса с указанным именем и сгенерированным id.
-class Dog {
+
+
+
+class Dog{
 public:
+    Dog(std::string& name) : name_{name}, dog_id{nextId++} {}
+
+    Dog(const Dog& other) : name_{other.name_}, dog_id{other.dog_id} {}
+
+    Dog& operator=(const Dog& other) {
+        if (this != &other) {
+            name_ = other.name_;
+            dog_id = other.dog_id;
+        }
+        return *this;
+    }
+
+    Dog(Dog&& other) noexcept : name_{std::move(other.name_)}, dog_id{other.dog_id} {}
+
+    Dog& operator=(Dog&& other) noexcept {
+        if (this != &other) {
+            name_ = std::move(other.name_);
+            dog_id = other.dog_id;
+        }
+        return *this;
+    }
+
+    bool operator==(const Dog& other) const {
+       return name_ == other.name_;
+    }
+
+    bool operator<(const Dog& other) const {
+       return name_ < other.name_;
+    }
+
+    bool operator>(const Dog& other) const {
+       return other < *this;
+    }
+
+    const std::string& GetName() const noexcept {
+        return name_;
+    }
+
+    const uint32_t GetId() const noexcept {
+        return dog_id;
+    }
 
 private:
     std::string name_;
-    std::uint64_t id;
+    static uint32_t nextId;
+    std::uint32_t dog_id = 0;
 };
+
+//namespace std {
+//    template <>
+//    struct hash<Dog> {
+//        size_t operator()(const Dog& dog) const {
+//            return hash<std::string>()(dog.GetName());
+//        }
+//    };
+//}
+
 
 class GameSession {
 public:
+//    GameSession(Dog& dog, const Map* map) : map_{map} {
+//        dogs_.insert(dog);
+//    };
+    using Id = util::Tagged<std::string, Map>;
+
+    GameSession(const Map* map) : map_{map} {}
+
+    void AddDog(Dog& dog) {
+        dogs_.push_back(dog);
+    }
+
+    const std::string& GetMapName() const noexcept {
+        return map_->GetName();
+    }
+
+    const Id& GetId() const noexcept {
+        return map_->GetId();
+    }
+
+    const size_t GetDogsCount() const noexcept {
+        return dogs_.size();
+    }
+
+    std::vector<Dog>& GetDogs() noexcept {
+        return dogs_;
+    }
+
 
 private:
-    std::unordered_set<Dog*> dogs_;
-    Map* map_;
+    std::vector<Dog> dogs_;
+    const Map* map_;
 };
 
 
@@ -194,6 +279,20 @@ public:
     using Maps = std::vector<Map>;
 
     void AddMap(Map map);
+
+    void AddSession(std::shared_ptr<GameSession> session) {
+        sessions.push_back(session);
+    }
+
+    std::shared_ptr<GameSession> FindValidSession(const Map* map) {
+        for (const auto& session : sessions) {
+            if (session->GetMapName() == map->GetName() && session->GetDogsCount() < constants::MAXPLAYERSINMAP)
+                return session;
+        }
+        auto newSession = std::make_shared<GameSession>(map);
+        AddSession(newSession);
+        return newSession;
+    }
 
     const Maps& GetMaps() const noexcept {
         return maps_;
@@ -212,6 +311,9 @@ private:
 
     std::vector<Map> maps_;
     MapIdToIndex map_id_to_index_;
+
+    //std::vector<GameSession> sessions;
+    std::vector<std::shared_ptr<GameSession>> sessions;
 };
 
 

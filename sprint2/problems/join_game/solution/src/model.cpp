@@ -35,4 +35,10 @@ void Game::AddMap(Map map) {
     }
 }
 
+//void Game::AddSession(GameSession session) {
+//    sessions.push_back(session);
+//}
+
+uint32_t Dog::nextId = 0;
+
 }  // namespace model

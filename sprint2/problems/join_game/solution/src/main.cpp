@@ -59,6 +59,7 @@ int main(int argc, const char* argv[]) {
             return EXIT_FAILURE;
         }
         app::PlayerTokens playerTokens;
+        app::Players players;
 
         // 2. Инициализируем io_context
         const unsigned num_threads = std::thread::hardware_concurrency();
@@ -82,7 +83,7 @@ int main(int argc, const char* argv[]) {
 
         //http_handler::ApiRequestHandler api_handler{game, static_path, api_strand};
         //http_handler::StaticFileRequestHandler static_file_handler{game, static_path};
-        auto api_handler = std::make_shared<http_handler::ApiRequestHandler>(game, static_path, api_strand, playerTokens);
+        auto api_handler = std::make_shared<http_handler::ApiRequestHandler>(game, static_path, api_strand, playerTokens, players);
         auto static_file_handler = std::make_shared<http_handler::StaticFileRequestHandler>(game, static_path);
 
         http_handler::LoggingRequestHandler<http_handler::ApiRequestHandler> logging_api_handler{*api_handler};
