@@ -111,7 +111,7 @@ public:
     Session(tcp::socket&& socket, Handler&& request_handler, const std::string& client_ip)
         : SessionBase(std::move(socket))
         , request_handler_(std::forward<Handler>(request_handler))
-        , client_ip_(client_ip) {  //del
+        , client_ip_(client_ip) {
     }
 
 private:
@@ -119,7 +119,7 @@ private:
         return this->shared_from_this();
     }
     RequestHandler request_handler_;
-    std::string client_ip_; // del
+    std::string client_ip_;
 
     void HandleRequest(HttpRequest&& request) override {
         // Захватываем умный указатель на текущий объект Session в лямбде,

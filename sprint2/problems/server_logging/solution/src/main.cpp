@@ -74,15 +74,33 @@ int main(int argc, const char* argv[]) {
         });
 
         // 4. Создаём обработчик HTTP-запросов и связываем его с моделью игры
-        http_handler::RequestHandler handler{game, static_path};
-        http_handler::LoggingRequestHandler logging_handler{handler};
+        //http_handler::RequestHandler handler{game, static_path};
+        //http_handler::LoggingRequestHandler logging_handler{handler};
+        auto api_strand = net::make_strand(ioc);
+
+        //http_handler::ApiRequestHandler api_handler{game, static_path, api_strand};
+        //http_handler::StaticFileRequestHandler static_file_handler{game, static_path};
+        auto api_handler = std::make_shared<http_handler::ApiRequestHandler>(game, static_path, api_strand);
+        auto static_file_handler = std::make_shared<http_handler::StaticFileRequestHandler>(game, static_path);
+
+        http_handler::LoggingRequestHandler<http_handler::ApiRequestHandler> logging_api_handler{*api_handler};
+        http_handler::LoggingRequestHandler<http_handler::StaticFileRequestHandler> logging_static_file_handler{*static_file_handler};
+
 
         // 5. Запустить обработчик HTTP-запросов, делегируя их обработчику запросов
         const auto address = net::ip::make_address("0.0.0.0");
         constexpr net::ip::port_type port = 8080;
-        http_server::ServeHttp(ioc, {address, port}, [&logging_handler](auto&& req, const std::string& client_ip, auto&& send) {
-            logging_handler(std::forward<decltype(req)>(req), client_ip, std::forward<decltype(send)>(send));
+        http_server::ServeHttp(ioc, {address, port}, [&logging_api_handler, &logging_static_file_handler](auto&& req, const std::string& client_ip, auto&& send) {
+            if (req.target().starts_with("/api/")) {
+                logging_api_handler(std::forward<decltype(req)>(req), client_ip, std::forward<decltype(send)>(send));
+            } else {
+                logging_static_file_handler(std::forward<decltype(req)>(req), client_ip, std::forward<decltype(send)>(send));
+            }
         });
+
+        //http_server::ServeHttp(ioc, {address, port}, [&logging_handler](auto&& req, const std::string& client_ip, auto&& send) {
+            //logging_handler(std::forward<decltype(req)>(req), client_ip, std::forward<decltype(send)>(send));
+        //});
 
         // Эта надпись сообщает тестам о том, что сервер запущен и готов обрабатывать запросы std::cout << "Server has started..."sv << std::endl
         json::value custom_data = json::object{
