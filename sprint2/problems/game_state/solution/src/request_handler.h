@@ -312,14 +312,23 @@ private:
                                 dog->GetCoordinate().y};
             dog_json["speed"] = {dog->GetSpeed().first,
                                     dog->GetSpeed().second};
-            if (dog->GetDirection() == model::Direction::NORTH) {
-                dog_json["dir"] = "U"s;
-            } else if (dog->GetDirection() == model::Direction::WEST) {
-                dog_json["dir"] = "L"s;
-            } else if (dog->GetDirection() == model::Direction::EAST) {
-                dog_json["dir"] = "R"s;
-            } else if (dog->GetDirection() == model::Direction::SOUTH) {
-                dog_json["dir"] = "D"s;
+
+            switch (dog->GetDirection()) {
+                case model::Direction::NORTH:
+                    dog_json["dir"] = "U";
+                    break;
+                case model::Direction::WEST:
+                    dog_json["dir"] = "L";
+                    break;
+                case model::Direction::EAST:
+                    dog_json["dir"] = "R";
+                    break;
+                case model::Direction::SOUTH:
+                    dog_json["dir"] = "D";
+                    break;
+                default:
+                    dog_json["dir"] = "Unknown";
+                    break;
             }
 
             players_json[std::to_string(dog->GetId())] = dog_json;
