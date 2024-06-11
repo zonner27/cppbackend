@@ -223,48 +223,19 @@ private:
             return;
         }
 
-        auto authHeader = req.find(http::field::authorization);
+        ExecuteAuthorized(req, std::forward<Send>(send), [this, &send](const app::Token& token) {
 
-        if (authHeader == req.end()) {
-            sendErrorResponse("invalidToken", "Authorization header is missing", http::status::unauthorized, std::forward<Send>(send));
-            return;
-        }
-        std::string tokenStr = authHeader->value().to_string();
-        const std::string bearerPrefix = "Bearer ";
-        if (tokenStr.rfind(bearerPrefix, 0) == 0) {
-            tokenStr = tokenStr.substr(bearerPrefix.size());
-        } else {
-            sendErrorResponse("invalidToken", "Invalid token format", http::status::unauthorized, std::forward<Send>(send));
-            return;
-        }
+            app::Player* player = playerTokens_.FindPlayerByToken(token);
+            model::GameSession* player_session = player->GetSession();
+            boost::json::object response_json;
 
-        if (tokenStr.size() != 32) {
-            sendErrorResponse("invalidToken", "Invalid token format", http::status::unauthorized, std::forward<Send>(send));
-            return;
-        }
-
-        //std::cout << "auth = " << tokenStr << std::endl;
-        //playerTokens_.PrintToken();
-
-        app::Token token(tokenStr);
-        app::Player* player = playerTokens_.FindPlayerByToken(token);
-        if (!player) {
-            sendErrorResponse("unknownToken", "Player token has not been found", http::status::unauthorized, std::forward<Send>(send));
-            return;
-        }
-
-        model::GameSession* player_session = player->GetSession();
-        //std::vector<model::Dog> dogsInSession = player_session->GetDogs();
-
-        boost::json::object response_json;
-
-        for (const model::Dog& dog : player_session->GetDogs()) {   //dogsInSession
-            //std::cout << "id = " << dog.GetId() << " name = " << dog.GetName() << std::endl;
-            boost::json::object dog_json;
-            dog_json["name"] = dog.GetName();
-            response_json[std::to_string(dog.GetId())] = dog_json;
-        }
-        sendJsonResponse(response_json, std::forward<Send>(send));
+            for (const model::Dog& dog : player_session->GetDogs()) {
+                boost::json::object dog_json;
+                dog_json["name"] = dog.GetName();
+                response_json[std::to_string(dog.GetId())] = dog_json;
+            }
+            sendJsonResponse(response_json, std::forward<Send>(send));
+        });
     }
 
     template <typename Send>
@@ -275,12 +246,51 @@ private:
             return;
         }
 
+        ExecuteAuthorized(req, std::forward<Send>(send), [this, &send](const app::Token& token) {
+            boost::json::object players_json;
+
+            for (auto& [dog, player] : players_.GetPlayers()) {
+
+                boost::json::object dog_json;
+                dog_json["pos"] = {dog->GetCoordinate().x, dog->GetCoordinate().y};
+                dog_json["speed"] = {dog->GetSpeed().first, dog->GetSpeed().second};
+
+                switch (dog->GetDirection()) {
+                    case model::Direction::NORTH:
+                        dog_json["dir"] = "U";
+                        break;
+                    case model::Direction::WEST:
+                        dog_json["dir"] = "L";
+                        break;
+                    case model::Direction::EAST:
+                        dog_json["dir"] = "R";
+                        break;
+                    case model::Direction::SOUTH:
+                        dog_json["dir"] = "D";
+                        break;
+                    default:
+                        dog_json["dir"] = "Unknown";
+                        break;
+                }
+
+                players_json[std::to_string(dog->GetId())] = dog_json;
+            }
+
+            json::object response_json;
+            response_json["players"] = players_json;
+            sendJsonResponse(response_json, std::forward<Send>(send));
+        });
+    }
+
+    template <typename Fn, typename Send>
+    void ExecuteAuthorized(const http::request<http::string_body>& req, Send&& send, Fn&& action) {
         auto authHeader = req.find(http::field::authorization);
 
         if (authHeader == req.end()) {
             sendErrorResponse("invalidToken", "Authorization header is required", http::status::unauthorized, std::forward<Send>(send));
             return;
         }
+
         std::string tokenStr = authHeader->value().to_string();
         const std::string bearerPrefix = "Bearer ";
         if (tokenStr.rfind(bearerPrefix, 0) == 0) {
@@ -302,43 +312,8 @@ private:
             return;
         }
 
-        boost::json::object players_json;
-
-
-        for (auto& [dog, player] : players_.GetPlayers()) {
-
-            boost::json::object dog_json;
-            dog_json["pos"] = {dog->GetCoordinate().x,
-                                dog->GetCoordinate().y};
-            dog_json["speed"] = {dog->GetSpeed().first,
-                                    dog->GetSpeed().second};
-
-            switch (dog->GetDirection()) {
-                case model::Direction::NORTH:
-                    dog_json["dir"] = "U";
-                    break;
-                case model::Direction::WEST:
-                    dog_json["dir"] = "L";
-                    break;
-                case model::Direction::EAST:
-                    dog_json["dir"] = "R";
-                    break;
-                case model::Direction::SOUTH:
-                    dog_json["dir"] = "D";
-                    break;
-                default:
-                    dog_json["dir"] = "Unknown";
-                    break;
-            }
-
-            players_json[std::to_string(dog->GetId())] = dog_json;
-        }
-
-        json::object response_json;
-        response_json["players"] = players_json;
-        sendJsonResponse(response_json, std::forward<Send>(send));
+        action(token);
     }
-
 
     json::object createMapJson(const model::Map& map);
 };
