@@ -268,11 +268,15 @@ public:
     void AddMap(Map map);
 
     void AddSession(std::shared_ptr<GameSession> session) {
-        sessions.push_back(session);
+        sessions_.push_back(session);
+    }
+
+    std::vector<std::shared_ptr<GameSession>>& GetAllSession() {
+        return sessions_;
     }
 
     std::shared_ptr<GameSession> FindValidSession(const Map* map) {
-        for (const auto& session : sessions) {
+        for (const auto& session : sessions_) {
             if (session->GetMapName() == map->GetName() && session->GetDogsCount() < constants::MAXPLAYERSINMAP)
                 return session;
         }
@@ -300,7 +304,7 @@ private:
     MapIdToIndex map_id_to_index_;
 
     //std::vector<GameSession> sessions;
-    std::vector<std::shared_ptr<GameSession>> sessions;
+    std::vector<std::shared_ptr<GameSession>> sessions_;
 };
 
 

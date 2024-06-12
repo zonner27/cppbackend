@@ -190,18 +190,11 @@ private:
             }
 
             std::shared_ptr<model::Dog> dog = std::make_shared<model::Dog>(userName);
-            //std::cout << "dog = " << dog->GetName() << " " << dog->GetId() << std::endl;
             std::shared_ptr<model::GameSession> validSession = game_.FindValidSession(map);
             validSession->AddDog(*dog);
-            //std::cout << "session dogs count = " << validSession->GetDogsCount() << "  map = " << validSession->GetMapName() << std::endl;
-
             app::Player& player = players_.Add(dog.get(), validSession.get());
-            //std::cout << "player = dog = " << player.GetDog()->GetName() << std::endl;
-
             app::Token authToken = playerTokens_.AddPlayer(player);
-            //std::cout << "authToken = " <<  *authToken << std::endl;
             uint32_t playerId = player.GetPlayerId();
-            //std::cout << "player id = " << playerId << std::endl;
 
             json::object responseBody = {
                 {"authToken", *authToken},
@@ -249,36 +242,36 @@ private:
         ExecuteAuthorized(req, std::forward<Send>(send), [this, &send](const app::Token& token) {
             boost::json::object players_json;
 
-            for (auto& [dog, player] : players_.GetPlayers()) {
-
-                boost::json::object dog_json;
-                dog_json["pos"] = {dog->GetCoordinate().x, dog->GetCoordinate().y};
-                dog_json["speed"] = {dog->GetSpeed().first, dog->GetSpeed().second};
-
-                switch (dog->GetDirection()) {
-                    case model::Direction::NORTH:
-                        dog_json["dir"] = "U";
-                        break;
-                    case model::Direction::WEST:
-                        dog_json["dir"] = "L";
-                        break;
-                    case model::Direction::EAST:
-                        dog_json["dir"] = "R";
-                        break;
-                    case model::Direction::SOUTH:
-                        dog_json["dir"] = "D";
-                        break;
-                    default:
-                        dog_json["dir"] = "Unknown";
-                        break;
+            std::vector<std::shared_ptr<model::GameSession>> sessions = game_.GetAllSession();
+            for (std::shared_ptr<model::GameSession>& session : sessions) {
+                for (const model::Dog& dog : session->GetDogs()) {
+                    boost::json::object dog_json;
+                    dog_json["pos"] = {dog.GetCoordinate().x, dog.GetCoordinate().y};
+                    dog_json["speed"] = {dog.GetSpeed().first, dog.GetSpeed().second};
+                    switch (dog.GetDirection()) {
+                        case model::Direction::NORTH:
+                            dog_json["dir"] = "U";
+                            break;
+                        case model::Direction::WEST:
+                            dog_json["dir"] = "L";
+                            break;
+                        case model::Direction::EAST:
+                            dog_json["dir"] = "R";
+                            break;
+                        case model::Direction::SOUTH:
+                            dog_json["dir"] = "D";
+                            break;
+                        default:
+                            dog_json["dir"] = "Unknown";
+                            break;
+                    }
+                    players_json[std::to_string(dog.GetId())] = dog_json;
                 }
-
-                players_json[std::to_string(dog->GetId())] = dog_json;
             }
-
             json::object response_json;
             response_json["players"] = players_json;
             sendJsonResponse(response_json, std::forward<Send>(send));
+
         });
     }
 
