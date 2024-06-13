@@ -257,8 +257,8 @@ public:
 
     GameSession(const Map* map) : map_{map} {}
 
-    void AddDog(Dog& dog) {
-        dogs_.push_back(dog);
+    void AddDog(std::shared_ptr<Dog> dog) {
+        dogs_.insert(dog);
     }
 
     const std::string& GetMapName() const noexcept {
@@ -277,13 +277,13 @@ public:
         return dogs_.size();
     }
 
-    std::vector<Dog>& GetDogs() noexcept {
+    std::unordered_set<std::shared_ptr<Dog>>& GetDogs() noexcept {
         return dogs_;
     }
 
 
 private:
-    std::vector<Dog> dogs_;
+    std::unordered_set<std::shared_ptr<Dog>> dogs_;
     const Map* map_;
 };
 

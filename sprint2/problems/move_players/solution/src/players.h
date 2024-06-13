@@ -19,30 +19,30 @@ namespace app {
 class Player {
 public:
     Player() = default;
-    Player(model::Dog* dog, model::GameSession* game_session) : playerId(dog->GetId()), dog_(dog), session_(game_session) {}
+    Player(std::shared_ptr<model::Dog> dog, std::shared_ptr<model::GameSession> game_session) : playerId(dog->GetId()), dog_(dog), session_(game_session) {}
 
     uint32_t GetPlayerId() const {
         return playerId;
     }
 
-    model::Dog* GetDog() const {
+    std::shared_ptr<model::Dog> GetDog() const {
         return dog_;
     }
 
-    model::GameSession* GetSession() const {
+    std::shared_ptr<model::GameSession> GetSession() const {
         return session_;
     }
 
 
 private:
     uint32_t playerId  = 0;
-    model::GameSession* session_;
-    model::Dog* dog_;
+    std::shared_ptr<model::GameSession> session_;       //model::GameSession* session_
+    std::shared_ptr<model::Dog>  dog_;    //model::Dog* dog_
 };
 
 class Players {
 public:
-    Player& Add(model::Dog* dog, model::GameSession* session) {
+    Player& Add(std::shared_ptr<model::Dog> dog, std::shared_ptr<model::GameSession> session) {
         auto it = players_.find(dog);
         if (it != players_.end()) {
             return it->second;
@@ -65,13 +65,12 @@ public:
         return nullptr;
     }
 
-    std::unordered_map<model::Dog*, Player> GetPlayers() {
+    std::unordered_map<std::shared_ptr<model::Dog> , Player> GetPlayers() {
         return players_;
     }
 
-
 private:
-    std::unordered_map<model::Dog*, Player> players_;
+    std::unordered_map<std::shared_ptr<model::Dog> , Player> players_;
 };
 
 using Token = util::Tagged<std::string, detail::TokenTag>;

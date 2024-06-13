@@ -193,8 +193,8 @@ private:
 
             std::shared_ptr<model::Dog> dog = std::make_shared<model::Dog>(userName);
             std::shared_ptr<model::GameSession> validSession = game_.FindValidSession(map);
-            validSession->AddDog(*dog);
-            app::Player& player = players_.Add(dog.get(), validSession.get());
+            validSession->AddDog(dog);
+            app::Player& player = players_.Add(dog, validSession);
             app::Token authToken = playerTokens_.AddPlayer(player);
             uint32_t playerId = player.GetPlayerId();
 
@@ -221,13 +221,14 @@ private:
         ExecuteAuthorized(req, std::forward<Send>(send), [this, &send](const app::Token& token) {
 
             app::Player* player = playerTokens_.FindPlayerByToken(token);
-            model::GameSession* player_session = player->GetSession();
+            std::cout << "player name = " << player->GetDog()->GetName() << std::endl;
+            std::shared_ptr<model::GameSession> player_session = player->GetSession();
             boost::json::object response_json;
 
-            for (const model::Dog& dog : player_session->GetDogs()) {
+            for (const std::shared_ptr<model::Dog>& dog : player_session->GetDogs()) {
                 boost::json::object dog_json;
-                dog_json["name"] = dog.GetName();
-                response_json[std::to_string(dog.GetId())] = dog_json;
+                dog_json["name"] = dog->GetName();
+                response_json[std::to_string(dog->GetId())] = dog_json;
             }
             sendJsonResponse(response_json, std::forward<Send>(send));
         });
@@ -262,11 +263,13 @@ private:
 
                 app::Player* player = playerTokens_.FindPlayerByToken(token);
 
-                model::Dog* dog = player->GetDog();
+                std::shared_ptr<model::Dog> dog = player->GetDog();
+//                std::cout << " dog count " << dog.use_count() << std::endl;
                 const model::Map* map = player->GetSession()->GetMap();
                 double s = map->GetDogSpeed();
-//                std::cout << "Speed = " << s << " for dog id " << dog->GetId() << " name " << dog->GetName() << " dog speed = " << std::to_string(dog->GetSpeed().first) << " "
-//                                                                            << std::to_string(dog->GetSpeed().second) << std::endl;
+//                std::pair<double, double> dogSpeed_tmp = dog->GetSpeed();
+//                std::cout << "Speed = " << s << " for dog id " << dog->GetId() << " name " << dog->GetName() << " dog speed = " << std::to_string(dogSpeed_tmp.first) << " "
+//                                                                            << std::to_string(dogSpeed_tmp.second) << std::endl;
 
                 if (move == "L") {
                     dog->SetSpeed({-s, 0});
@@ -283,8 +286,9 @@ private:
                     return;
                 }
 
-//                std::cout << "Speed = " << s << " for dog id " << dog->GetId() << " name " << dog->GetName() << " dog speed = " << std::to_string(dog->GetSpeed().first) << " "
-//                                                                            << std::to_string(dog->GetSpeed().second) << std::endl;;
+//                dogSpeed_tmp = dog->GetSpeed();
+//                std::cout << "After Speed = " << s << " for dog id " << dog->GetId() << " name " << dog->GetName() << " dog speed = " << std::to_string(dogSpeed_tmp.first) << " "
+//                                                    << std::to_string(dogSpeed_tmp.second) << std::endl;;
 
                 sendJsonResponse("{}", std::forward<Send>(send));
 
@@ -308,13 +312,15 @@ private:
 
             std::vector<std::shared_ptr<model::GameSession>> sessions = game_.GetAllSession();
             for (std::shared_ptr<model::GameSession>& session : sessions) {
-                for (const model::Dog& dog : session->GetDogs()) {
+                for (const std::shared_ptr<model::Dog>& dog : session->GetDogs()) {
                     boost::json::object dog_json;
-                    dog_json["pos"] = {dog.GetCoordinate().x, dog.GetCoordinate().y};
-                    dog_json["speed"] = {dog.GetSpeed().first, dog.GetSpeed().second};
-//                    std::cout << "Speed = " << " for dog id " << dog.GetId() << " Name " << dog.GetName() << " dog speed = " << std::to_string(dog.GetSpeed().first) << " "
-//                                             << std::to_string(dog.GetSpeed().second) << std::endl;
-                    switch (dog.GetDirection()) {
+                    dog_json["pos"] = {dog->GetCoordinate().x, dog->GetCoordinate().y};
+                    dog_json["speed"] = {dog->GetSpeed().first, dog->GetSpeed().second};
+
+                    //std::pair<double, double> dogSpeed_tmp = dog->GetSpeed();
+//                    std::cout << "Speed = " << " for dog id " << dog->GetId() << " Name " << dog->GetName() << " dog speed = " << std::to_string(dogSpeed_tmp.first) << " "
+//                                             << std::to_string(dogSpeed_tmp.second) << std::endl;
+                    switch (dog->GetDirection()) {
                         case model::Direction::NORTH:
                             dog_json["dir"] = "U";
                             break;
@@ -331,7 +337,7 @@ private:
                             dog_json["dir"] = "Unknown";
                             break;
                     }
-                    players_json[std::to_string(dog.GetId())] = dog_json;
+                    players_json[std::to_string(dog->GetId())] = dog_json;
                 }
             }
             json::object response_json;
