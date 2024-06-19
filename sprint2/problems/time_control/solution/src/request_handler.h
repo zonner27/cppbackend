@@ -106,7 +106,7 @@ protected:
     }
 };
 
-class ApiRequestHandler : public BaseRequestHandler {
+class ApiRequestHandler : public BaseRequestHandler, public std::enable_shared_from_this<ApiRequestHandler> {
 public:
     using Strand = net::strand<net::io_context::executor_type>;
 
@@ -117,23 +117,23 @@ public:
 
     template <typename Body, typename Allocator, typename Send>
     void operator()(http::request<Body, http::basic_fields<Allocator>>&& req, Send&& send) {
-        net::dispatch(api_strand_, [this, req = std::move(req), send = std::forward<Send>(send)]() mutable {
+        net::dispatch(api_strand_, [self = shared_from_this(), req = std::move(req), send = std::forward<Send>(send)]() mutable {
             if (req.target() == "/api/v1/maps" && req.method() == http::verb::get) {
-                handleGetMapsRequest(std::forward<Send>(send));
+                self->handleGetMapsRequest(std::forward<Send>(send));
             } else if (req.method() == http::verb::get && req.target().starts_with("/api/v1/maps/")) {
-                handleGetMapByIdRequest(req.target().to_string().substr(13), std::forward<Send>(send));
+                self->handleGetMapByIdRequest(req.target().to_string().substr(13), std::forward<Send>(send));
             } else if (req.target() == "/api/v1/game/players" ) {
-                handleGetPlayersRequest(req, std::forward<Send>(send));
+                self->handleGetPlayersRequest(req, std::forward<Send>(send));
             } else if (req.target() == "/api/v1/game/join") {
-                handleJoinGameRequest(req, std::forward<Send>(send));
+                self->handleJoinGameRequest(req, std::forward<Send>(send));
             } else if (req.target() == "/api/v1/game/state") {
-                handleGetState(req, std::forward<Send>(send));
+                self->handleGetState(req, std::forward<Send>(send));
             } else if (req.target() == "/api/v1/game/player/action") {
-                handleSetPlayerAction(req, std::forward<Send>(send));
+                self->handleSetPlayerAction(req, std::forward<Send>(send));
             } else if (req.target() == "/api/v1/game/tick") {
-                handleSetPlayersTick(req, std::forward<Send>(send));
+                self->handleSetPlayersTick(req, std::forward<Send>(send));
             } else {
-                sendErrorResponse("badRequest", "Bad request", http::status::bad_request, std::forward<Send>(send));
+                self->sendErrorResponse("badRequest", "Bad request", http::status::bad_request, std::forward<Send>(send));
             }
         });
     }

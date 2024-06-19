@@ -447,6 +447,7 @@ public:
 
             //std::cout << "finish x = " << finish.x << " y = " << finish.y << std::endl;
             dog->SetCoordinate(finish);
+            dog->SetSpeed({0, 0});
 
         }
     }
