@@ -34,7 +34,7 @@ public:
 private:
     uint32_t playerId  = 0;
     std::shared_ptr<model::GameSession> session_;       //model::GameSession* session_
-    std::shared_ptr<model::Dog>  dog_;    //model::Dog* dog_
+    std::shared_ptr<model::Dog>  dog_;                  //model::Dog* dog_
 };
 
 class Players {

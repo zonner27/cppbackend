@@ -1,3 +1,5 @@
+#pragma once
+
 #include "players.h"
 
 namespace detail {
@@ -14,11 +16,7 @@ public:
     Token generateToken();
     Token AddPlayer(Player& player);
     Player* FindPlayerByToken(const Token& token);
-    void PrintToken() {
-        for (const auto& token : token_to_player_) {
-            std::cout << *token.first << std::endl;
-        }
-    }
+    void PrintToken();
 
 private:
 
