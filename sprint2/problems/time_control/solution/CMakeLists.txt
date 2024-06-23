@@ -22,8 +22,21 @@ add_executable(game_server
         src/http_server/http_server.cpp
         src/http_server/http_server.h
 	src/sdk.h
+
+        src/app/players.h
+        src/app/players.cpp
+        src/app/player_tokens.h
+        src/app/player_tokens.cpp
+
         src/model/model.h
         src/model/model.cpp
+        src/model/dog.h
+        src/model/dog.cpp
+        src/model/game.h
+        src/model/game.cpp
+        src/model/game_session.h
+        src/model/game_session.cpp
+
 	src/tagged.h
         src/json_loader/boost_json.cpp
         src/json_loader/json_loader.h
@@ -35,9 +48,8 @@ add_executable(game_server
         src/files.h
         src/streamadapter.h
         src/logger/logger.h
-        src/logger/logger.cpp
-        src/app/players.h
-        src/app/players.cpp
+        src/logger/logger.cpp 
+
 )
 target_include_directories(game_server PRIVATE CONAN_PKG::boost)
 target_link_libraries(game_server 			

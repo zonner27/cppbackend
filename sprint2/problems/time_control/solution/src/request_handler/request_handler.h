@@ -1,11 +1,15 @@
 #pragma once
 #include "../http_server/http_server.h"
 #include "../model/model.h"
+#include "../model/game.h"
+#include "../model/game_session.h"
+#include "../model/dog.h"
 #include "../constants.h"
 #include "../files.h"
 #include "../streamadapter.h"
 #include "../logger/logger.h"
 #include "../app/players.h"
+#include "../app/player_tokens.h"
 
 #include <boost/json.hpp>
 #include <boost/beast.hpp>
@@ -31,7 +35,7 @@ public:
     BaseRequestHandler(const BaseRequestHandler&) = delete;
     BaseRequestHandler& operator=(const BaseRequestHandler&) = delete;
 
-protected:
+protected:    
     model::Game& game_;
     fs::path static_path_;
 

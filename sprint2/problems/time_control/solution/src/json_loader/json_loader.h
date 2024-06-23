@@ -6,6 +6,7 @@
 #include <boost/json.hpp>
 
 #include "../model/model.h"
+#include "../model/game.h"
 #include "../constants.h"
 
 namespace json_loader {
