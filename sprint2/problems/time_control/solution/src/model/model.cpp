@@ -21,24 +21,5 @@ void Map::AddOffice(Office office) {
     }
 }
 
-void Game::AddMap(Map map) {
-    const size_t index = maps_.size();
-    if (auto [it, inserted] = map_id_to_index_.emplace(map.GetId(), index); !inserted) {
-        throw std::invalid_argument("Map with id "s + *map.GetId() + " already exists"s);
-    } else {
-        try {
-            maps_.emplace_back(std::move(map));
-        } catch (...) {
-            map_id_to_index_.erase(it);
-            throw;
-        }
-    }
-}
-
-//void Game::AddSession(GameSession session) {
-//    sessions.push_back(session);
-//}
-
-uint32_t Dog::nextId = 0;
 
 }  // namespace model
