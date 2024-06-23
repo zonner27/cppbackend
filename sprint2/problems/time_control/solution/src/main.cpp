@@ -5,11 +5,11 @@
 #include <iostream>
 #include <thread>
 
-#include "json_loader.h"
-#include "request_handler.h"
+#include "json_loader/json_loader.h"
+#include "request_handler/request_handler.h"
 #include "files.h"
-#include "logger.h"
-#include "players.h"
+#include "logger/logger.h"
+#include "app/players.h"
 
 using namespace std::literals;
 namespace net = boost::asio;
