@@ -37,6 +37,7 @@ public:
                             finish.x = calc_finish.x;
                         } else {
                             finish.x = road_x_end + 0.4;
+                            dog->SetSpeed({0, 0});
                         }
                     }
                     if (direction == constants::Direction::WEST) {
@@ -45,6 +46,7 @@ public:
                             finish.x = calc_finish.x;
                         } else {
                             finish.x = road_x_begin - 0.4;
+                            dog->SetSpeed({0, 0});
                         }
                     }
                 } else {
@@ -53,6 +55,7 @@ public:
                             finish.x = calc_finish.x;
                         } else {
                             finish.x = static_cast<double>(start_x) + 0.4;
+                            dog->SetSpeed({0, 0});
                         }
                     }
                     if (direction == constants::Direction::WEST) {
@@ -60,6 +63,7 @@ public:
                             finish.x = calc_finish.x;
                         } else {
                             finish.x = static_cast<double>(start_x) - 0.4;
+                            dog->SetSpeed({0, 0});
                         }
                     }
                 }
@@ -72,6 +76,7 @@ public:
                             finish.y = calc_finish.y;
                         } else {
                             finish.y = road_y_end + 0.4;
+                            dog->SetSpeed({0, 0});
                         }
                     }
                     if (direction == constants::Direction::NORTH) {
@@ -80,6 +85,7 @@ public:
                             finish.y = calc_finish.y;
                         } else {
                             finish.y = road_y_begin - 0.4;
+                            dog->SetSpeed({0, 0});
                         }
                     }
                 } else {
@@ -88,6 +94,7 @@ public:
                             finish.y = calc_finish.y;
                         } else {
                             finish.y = static_cast<double>(start_y) + 0.4;
+                            dog->SetSpeed({0, 0});
                         }
                     }
                     if (direction == constants::Direction::NORTH) {
@@ -95,6 +102,7 @@ public:
                             finish.y = calc_finish.y;
                         } else {
                             finish.y = static_cast<double>(start_y) - 0.4;
+                            dog->SetSpeed({0, 0});
                         }
                     }
                 }
@@ -102,7 +110,7 @@ public:
 
             //std::cout << "finish x = " << finish.x << " y = " << finish.y << std::endl;
             dog->SetCoordinate(finish);
-            dog->SetSpeed({0, 0});
+            //dog->SetSpeed({0, 0});
 
         }
     }
