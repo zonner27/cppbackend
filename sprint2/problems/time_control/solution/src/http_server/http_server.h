@@ -1,12 +1,12 @@
 #pragma once
-#include "sdk.h"
+#include "../sdk.h"
 
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
 #include <iostream>
-#include "logger.h"
+#include "../logger/logger.h"
 
 namespace http_server {
 

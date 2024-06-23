@@ -19,25 +19,25 @@ find_package(Threads REQUIRED)
 
 add_executable(game_server
 	src/main.cpp
-	src/http_server.cpp
-	src/http_server.h
+        src/http_server/http_server.cpp
+        src/http_server/http_server.h
 	src/sdk.h
-	src/model.h
-	src/model.cpp
+        src/model/model.h
+        src/model/model.cpp
 	src/tagged.h
-	src/boost_json.cpp
-	src/json_loader.h
-	src/json_loader.cpp
-	src/request_handler.cpp
-	src/request_handler.h
+        src/json_loader/boost_json.cpp
+        src/json_loader/json_loader.h
+        src/json_loader/json_loader.cpp
+        src/request_handler/request_handler.cpp
+        src/request_handler/request_handler.h
 	src/constants.h
         src/files.cpp
         src/files.h
         src/streamadapter.h
-        src/logger.h
-        src/logger.cpp
-        src/players.h
-        src/players.cpp
+        src/logger/logger.h
+        src/logger/logger.cpp
+        src/app/players.h
+        src/app/players.cpp
 )
 target_include_directories(game_server PRIVATE CONAN_PKG::boost)
 target_link_libraries(game_server 			

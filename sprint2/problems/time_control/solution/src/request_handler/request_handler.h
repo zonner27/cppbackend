@@ -1,11 +1,11 @@
 #pragma once
-#include "http_server.h"
-#include "model.h"
-#include "constants.h"
-#include "files.h"
-#include "streamadapter.h"
-#include "logger.h"
-#include "players.h"
+#include "../http_server/http_server.h"
+#include "../model/model.h"
+#include "../constants.h"
+#include "../files.h"
+#include "../streamadapter.h"
+#include "../logger/logger.h"
+#include "../app/players.h"
 
 #include <boost/json.hpp>
 #include <boost/beast.hpp>

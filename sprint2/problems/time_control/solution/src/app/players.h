@@ -4,8 +4,8 @@
 #include <string>
 #include <iomanip>
 #include <unordered_map>
-#include "tagged.h"
-#include "model.h"
+#include "../tagged.h"
+#include "../model/model.h"
 #include <iostream> //del
 
 namespace detail {

@@ -5,8 +5,8 @@
 #include <iostream>
 #include <boost/json.hpp>
 
-#include "model.h"
-#include "constants.h"
+#include "../model/model.h"
+#include "../constants.h"
 
 namespace json_loader {
 
