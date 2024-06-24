@@ -15,11 +15,13 @@ namespace app {
 
 class Player {
 public:
+    using ID = uint32_t;
+
     Player() = default;
     Player(std::shared_ptr<model::Dog> dog, std::shared_ptr<model::GameSession> game_session) : playerId(dog->GetId()), dog_(dog), session_(game_session) {
     }
 
-    uint32_t GetPlayerId() const {
+    ID GetPlayerId() const {
         return playerId;
     }
 
@@ -29,14 +31,14 @@ public:
 
     std::shared_ptr<model::GameSession> GetSession() const {
         return session_;
-    }
-
+    } 
 
 private:
-    uint32_t playerId  = 0;
-    std::shared_ptr<model::GameSession> session_;       //std::shared_ptr<model::GameSession> session
-    std::shared_ptr<model::Dog>  dog_;                  //std::shared_ptr<model::Dog>  dog_
+    ID playerId  = 0;
+    std::shared_ptr<model::GameSession> session_;
+    std::shared_ptr<model::Dog>  dog_;
 };
+
 
 class Players {
 public:

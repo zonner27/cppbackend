@@ -10,6 +10,7 @@
 #include "../logger/logger.h"
 #include "../app/players.h"
 #include "../app/player_tokens.h"
+#include "../app/application.h"
 
 #include <boost/json.hpp>
 #include <boost/beast.hpp>
@@ -29,8 +30,8 @@ using StringRequest = http::request<http::string_body>;
 
 class BaseRequestHandler {
 public:
-    explicit BaseRequestHandler(model::Game& game, fs::path static_path)
-        : game_{game}, static_path_{static_path} {}
+    explicit BaseRequestHandler(app::Application& application, model::Game& game, fs::path static_path)
+        : application_{application}, game_{game}, static_path_{static_path} {}
 
     BaseRequestHandler(const BaseRequestHandler&) = delete;
     BaseRequestHandler& operator=(const BaseRequestHandler&) = delete;
@@ -38,6 +39,7 @@ public:
 protected:    
     model::Game& game_;
     fs::path static_path_;
+    app::Application& application_;
 
 
     template <typename Send>
@@ -114,8 +116,8 @@ class ApiRequestHandler : public BaseRequestHandler, public std::enable_shared_f
 public:
     using Strand = net::strand<net::io_context::executor_type>;
 
-    explicit ApiRequestHandler(model::Game& game, fs::path static_path,  Strand& api_strand, app::PlayerTokens& playerTokens, app::Players& players) //net::io_context& ioc,
-            : BaseRequestHandler(game, static_path), api_strand_{api_strand}, playerTokens_{playerTokens}, players_{players} {}
+    explicit ApiRequestHandler(app::Application& application, model::Game& game, fs::path static_path,  Strand& api_strand, app::PlayerTokens& playerTokens, app::Players& players) //net::io_context& ioc,
+            : BaseRequestHandler(application, game, static_path), api_strand_{api_strand}, playerTokens_{playerTokens}, players_{players} {}
 
     using BaseRequestHandler::BaseRequestHandler;
 
@@ -209,12 +211,17 @@ private:
                 return;
             }
 
-            std::shared_ptr<model::Dog> dog = std::make_shared<model::Dog>(userName);
-            std::shared_ptr<model::GameSession> validSession = game_.FindValidSession(map);
-            validSession->AddDog(dog);
-            app::Player& player = players_.Add(dog, validSession);
-            app::Token authToken = playerTokens_.AddPlayer(player);
-            uint32_t playerId = player.GetPlayerId();
+//            std::shared_ptr<model::Dog> dog = std::make_shared<model::Dog>(userName);
+//            std::shared_ptr<model::GameSession> validSession = game_.FindValidSession(map);
+//            validSession->AddDog(dog);
+//            app::Player& player = players_.Add(dog, validSession);
+//            app::Token authToken = playerTokens_.AddPlayer(player);
+//            uint32_t playerId = player.GetPlayerId();
+
+//            app::Token authToken;
+//            Player::ID playerId;
+
+            auto [authToken, playerId] = application_.JoinGame(userName, map);
 
             json::object responseBody = {
                 {"authToken", *authToken},
@@ -238,7 +245,8 @@ private:
 
         ExecuteAuthorized(req, std::forward<Send>(send), [this, &send](const app::Token& token) {
 
-            app::Player* player = playerTokens_.FindPlayerByToken(token);
+            //auto player = playerTokens_.FindPlayerByToken(token);
+            auto player = application_.GetPlayerTokens().FindPlayerByToken(token);
             std::cout << "player name = " << player->GetDog()->GetName() << std::endl;
             std::shared_ptr<model::GameSession> player_session = player->GetSession();
             boost::json::object response_json;
@@ -248,6 +256,7 @@ private:
                 dog_json["name"] = dog->GetName();
                 response_json[std::to_string(dog->GetId())] = dog_json;
             }
+
             sendJsonResponse(response_json, std::forward<Send>(send));
         });
     }
@@ -278,7 +287,8 @@ private:
 
                 std::string move = obj["move"].as_string().c_str();
 
-                app::Player* player = playerTokens_.FindPlayerByToken(token);
+                //app::Player* player = playerTokens_.FindPlayerByToken(token);
+                auto player = application_.GetPlayerTokens().FindPlayerByToken(token);
 
                 std::shared_ptr<model::Dog> dog = player->GetDog();
 //                std::cout << " dog count " << dog.use_count() << std::endl;
@@ -332,15 +342,16 @@ private:
         ExecuteAuthorized(req, std::forward<Send>(send), [this, &send](const app::Token& token) {
             boost::json::object players_json;
 
-            std::vector<std::shared_ptr<model::GameSession>> sessions = game_.GetAllSession();
+            //std::vector<std::shared_ptr<model::GameSession>> sessions = game_.GetAllSession();
+            std::vector<std::shared_ptr<model::GameSession>> sessions = application_.GetGame().GetAllSession();
             for (std::shared_ptr<model::GameSession>& session : sessions) {
                 for (const std::shared_ptr<model::Dog>& dog : session->GetDogs()) {
                     boost::json::object dog_json;
                     dog_json["pos"] = {dog->GetCoordinate().x, dog->GetCoordinate().y};
                     dog_json["speed"] = {dog->GetSpeed().first, dog->GetSpeed().second};
 
-                    std::cout << std::fixed << std::setprecision(4); //del
-                    std::pair<double, double> dogSpeed_tmp = dog->GetSpeed();
+                    //std::cout << std::fixed << std::setprecision(4); //del
+                    //std::pair<double, double> dogSpeed_tmp = dog->GetSpeed();
                     //std::cout << "Speed = " << " for dog id " << dog->GetId() << " Name " << dog->GetName() << " dog speed = " << std::to_string(dogSpeed_tmp.first) << " "
                     //                         << std::to_string(dogSpeed_tmp.second) << std::endl;
                     switch (dog->GetDirection()) {
@@ -438,7 +449,8 @@ private:
         }
 
         app::Token token(tokenStr);
-        app::Player* player = playerTokens_.FindPlayerByToken(token);
+        //auto player = playerTokens_.FindPlayerByToken(token);
+        auto player = application_.GetPlayerTokens().FindPlayerByToken(token);
         if (!player) {
             sendErrorResponse("unknownToken", "Player token has not been found", http::status::unauthorized, std::forward<Send>(send));
             return;

@@ -15,11 +15,36 @@ namespace net = boost::asio;
 
 class Application {
 
+public:
     Application(model::Game& game, net::io_context& ioc) :
         game_{game},
         ioc_{ioc}
         {}
 
+    std::pair<Token, Player::ID> JoinGame(std::string userName, const model::Map* map) {
+
+        std::shared_ptr<model::Dog> dog = std::make_shared<model::Dog>(userName);
+        std::shared_ptr<model::GameSession> validSession = game_.FindValidSession(map);
+        validSession->AddDog(dog);
+        std::shared_ptr<Player> player = std::make_shared<Player>(dog, validSession);
+        players_.push_back(player);
+        Token authToken = player_tokens_.AddPlayer(player);
+        Player::ID playerId = player->GetPlayerId();
+
+        return make_pair(authToken, playerId);
+    }
+
+    std::vector<std::shared_ptr<Player>>& GetPlayers() {
+        return players_;
+    }
+
+    PlayerTokens& GetPlayerTokens(){
+        return player_tokens_;
+    }
+
+    model::Game& GetGame() {
+        return game_;
+    }
 
 private:
     model::Game game_;

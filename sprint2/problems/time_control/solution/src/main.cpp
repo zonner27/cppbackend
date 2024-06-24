@@ -10,6 +10,7 @@
 #include "files.h"
 #include "logger/logger.h"
 #include "app/players.h"
+#include "app/application.h"
 
 using namespace std::literals;
 namespace net = boost::asio;
@@ -65,6 +66,9 @@ int main(int argc, const char* argv[]) {
         const unsigned num_threads = std::thread::hardware_concurrency();
         net::io_context ioc(num_threads);
 
+        app::Application application(game, ioc);
+
+
         // 3. Добавляем асинхронный обработчик сигналов SIGINT и SIGTERM
         // Подписываемся на сигналы и при их получении завершаем работу сервера
         net::signal_set signals(ioc, SIGINT, SIGTERM);
@@ -81,10 +85,11 @@ int main(int argc, const char* argv[]) {
         //http_handler::LoggingRequestHandler logging_handler{handler};
         auto api_strand = net::make_strand(ioc);
 
+
         //http_handler::ApiRequestHandler api_handler{game, static_path, api_strand};
         //http_handler::StaticFileRequestHandler static_file_handler{game, static_path};
-        auto api_handler = std::make_shared<http_handler::ApiRequestHandler>(game, static_path, api_strand, playerTokens, players);
-        auto static_file_handler = std::make_shared<http_handler::StaticFileRequestHandler>(game, static_path);
+        auto api_handler = std::make_shared<http_handler::ApiRequestHandler>(application, game, static_path, api_strand, playerTokens, players);
+        auto static_file_handler = std::make_shared<http_handler::StaticFileRequestHandler>(application, game, static_path);
 
         http_handler::LoggingRequestHandler<http_handler::ApiRequestHandler> logging_api_handler{*api_handler};
         http_handler::LoggingRequestHandler<http_handler::StaticFileRequestHandler> logging_static_file_handler{*static_file_handler};

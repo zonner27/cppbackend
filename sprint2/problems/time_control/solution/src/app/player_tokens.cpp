@@ -13,13 +13,13 @@ Token app::PlayerTokens::generateToken() {
     return Token(sstr.str());
 }
 
-Token PlayerTokens::AddPlayer(Player &player) {
+Token PlayerTokens::AddPlayer(std::shared_ptr<Player> player) {
     Token token = generateToken();
-    token_to_player_[token] = &player;
+    token_to_player_[token] = player;
     return token;
 }
 
-Player *PlayerTokens::FindPlayerByToken(const Token &token) {
+std::shared_ptr<Player> PlayerTokens::FindPlayerByToken(const Token &token) {
     auto it = token_to_player_.find(token);
     if (it != token_to_player_.end()) {
         return it->second;

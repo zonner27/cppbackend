@@ -13,9 +13,10 @@ using Token = util::Tagged<std::string, detail::TokenTag>;
 
 class PlayerTokens {
 public:
+    PlayerTokens() = default;
     Token generateToken();
-    Token AddPlayer(Player& player);
-    Player* FindPlayerByToken(const Token& token);
+    Token AddPlayer(std::shared_ptr<Player> player);    //std::shared_ptr<Player> player   Player&
+    std::shared_ptr<Player> FindPlayerByToken(const Token& token);  //std::shared_ptr<Player> player   Player*
     void PrintToken();
 
 private:
@@ -35,7 +36,7 @@ private:
     // чтобы сделать их подбор ещё более затруднительным
 
     using MapTokenHasher = util::TaggedHasher<Token>;
-    using MapTokenToPlayer = std::unordered_map<Token, Player*, MapTokenHasher>;
+    using MapTokenToPlayer = std::unordered_map<Token, std::shared_ptr<Player>, MapTokenHasher>;
     MapTokenToPlayer token_to_player_;
 
 };
