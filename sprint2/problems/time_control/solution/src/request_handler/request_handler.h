@@ -411,7 +411,8 @@ private:
             int time_delta = obj["timeDelta"].as_int64();
             //std::cout << "time_delta = " << time_delta << std::endl;
 
-            std::vector<std::shared_ptr<model::GameSession>> sessions = game_.GetAllSession();
+            //std::vector<std::shared_ptr<model::GameSession>> sessions = game_.GetAllSession();
+            std::vector<std::shared_ptr<model::GameSession>> sessions = application_.GetGame().GetAllSession();
             for (std::shared_ptr<model::GameSession>& session : sessions) {
                 session->SetDogsCoordinatsByTime(time_delta);
             }
