@@ -301,7 +301,7 @@ private:
                     dog->SetDirection(constants::Direction::SOUTH);
                     dog->SetSpeed({0, s});
                 } else if (move == "") {
-                    dog->SetDirection(constants::Direction::STOP);
+                    //dog->SetDirection(constants::Direction::STOP);
                     dog->SetSpeed({0, 0});
                 } else {
                     sendErrorResponse("invalidArgument", "Invalid move value", http::status::bad_request, std::forward<Send>(send));
