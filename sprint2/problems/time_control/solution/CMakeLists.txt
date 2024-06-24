@@ -27,6 +27,9 @@ add_executable(game_server
         src/app/players.cpp
         src/app/player_tokens.h
         src/app/player_tokens.cpp
+        src/app/application.h
+        src/app/application.cpp
+
 
         src/model/model.h
         src/model/model.cpp
