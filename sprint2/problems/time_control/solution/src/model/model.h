@@ -172,7 +172,6 @@ public:
         roads_.push_back(road);
         if (start_roads_point_.x == -1) {
             start_roads_point_ = road.GetStart();
-            //std::cout << " start_road_point x " << start_roads_point_.x << " y =  " << start_roads_point_.y << std::endl;
         }
         if (road.IsHorizontal()) {
             if (road.GetStart().x <= road.GetEnd().x) {
@@ -185,28 +184,6 @@ public:
                 ver_roads_[road.GetStart().x].push_back(road);
             } else {
                 ver_roads_[road.GetStart().x].push_back(model::Road(model::Road::HORIZONTAL, road.GetEnd(), road.GetStart().y));
-            }
-        }
-    }
-
-    void PrintHorRoads() const {
-        std::cout << "Horizontal roads:\n";
-        for (const auto& pair : hor_roads_) {
-            int y = pair.first;
-            const std::vector<Road>& roads = pair.second;
-            for (const Road& road : roads) {
-                std::cout << "  From (" << road.GetStart().x << ", " << y << ") to (" << road.GetEnd().x << ", " << y << ")\n";
-            }
-        }
-    }
-
-    void PrintVerRoads() const {
-        std::cout << "Vertical roads:\n";
-        for (const auto& pair : ver_roads_) {
-            int x = pair.first;
-            const std::vector<Road>& roads = pair.second;
-            for (const Road& road : roads) {
-                std::cout << "  From (" << x << ", " << road.GetStart().y << ") to (" << x << ", " << road.GetEnd().y << ")\n";
             }
         }
     }
@@ -262,11 +239,9 @@ private:
     Id id_;
     std::string name_;
     Roads roads_;
-    //RoadMatrix road_matrix_;
     Point start_roads_point_{-1, -1};
     RoadMap hor_roads_;
     RoadMap ver_roads_;
-    //std::unordered_map<Coord, bool> roads_map_;
     Buildings buildings_;
     double dogSpeed_;
 

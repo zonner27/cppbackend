@@ -48,9 +48,6 @@ model::Game LoadGame(const std::filesystem::path& json_path) {
         } catch (const std::exception& e) {
             throw std::runtime_error("Error while parsing map data in map: " + mapId + ": " + std::string(e.what()));
         }
-        //map.SetRoadMatrix();
-        //map.FindStartPointRoadMap();
-        //map.PrintRoad(); //del
         game.AddMap(map);
     }
 

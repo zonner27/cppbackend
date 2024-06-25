@@ -51,8 +51,10 @@ protected:
         response.content_length(body.size());
         response.set(http::field::cache_control, "no-cache");
 
-        SyncWriteOStreamAdapter adapter{std::cout}; ///del
-        http::write(adapter, response);     //del
+#ifdef ENABLE_SYNC_WRITE
+        SyncWriteOStreamAdapter adapter{std::cout};
+        http::write(adapter, response);
+#endif
 
         send(std::move(response));
     }
@@ -75,8 +77,10 @@ protected:
         response.content_length(body.size());
         response.set(http::field::cache_control, "no-cache");
 
-        SyncWriteOStreamAdapter adapter{std::cout}; ///del
-        http::write(adapter, response);     //del
+#ifdef ENABLE_SYNC_WRITE
+        SyncWriteOStreamAdapter adapter{std::cout};
+        http::write(adapter, response);
+#endif
 
         send(std::move(response));
     }
@@ -117,38 +121,30 @@ public:
 
     using BaseRequestHandler::BaseRequestHandler;
 
-//    explicit ApiRequestHandler(app::Application& application, fs::path static_path) //net::io_context& ioc,
-//            : BaseRequestHandler(application, static_path) {}
-
-
-
     template <typename Body, typename Allocator, typename Send>
     void operator()(http::request<Body, http::basic_fields<Allocator>>&& req, Send&& send) {
-       // net::dispatch(*application_.GetStrand(), [self = shared_from_this(), req = std::move(req), send = std::forward<Send>(send)]() mutable {    //api_strand
-            if (req.target() == "/api/v1/maps" && req.method() == http::verb::get) {
-                handleGetMapsRequest(std::forward<Send>(send));
-            } else if (req.method() == http::verb::get && req.target().starts_with("/api/v1/maps/")) {
-                handleGetMapByIdRequest(req.target().to_string().substr(13), std::forward<Send>(send));
-            } else if (req.target() == "/api/v1/game/players" ) {
-                handleGetPlayersRequest(req, std::forward<Send>(send));
-            } else if (req.target() == "/api/v1/game/join") {
-                handleJoinGameRequest(req, std::forward<Send>(send));
-            } else if (req.target() == "/api/v1/game/state") {
-                handleGetState(req, std::forward<Send>(send));
-            } else if (req.target() == "/api/v1/game/player/action") {
-                handleSetPlayerAction(req, std::forward<Send>(send));
-            } else if (req.target() == "/api/v1/game/tick") {
-                handleSetPlayersTick(req, std::forward<Send>(send));
-            } else {
-                sendErrorResponse("badRequest", "Bad request", http::status::bad_request, std::forward<Send>(send));
-            }
-       // });
+
+        if (req.target() == "/api/v1/maps" && req.method() == http::verb::get) {
+            handleGetMapsRequest(std::forward<Send>(send));
+        } else if (req.method() == http::verb::get && req.target().starts_with("/api/v1/maps/")) {
+            handleGetMapByIdRequest(req.target().to_string().substr(13), std::forward<Send>(send));
+        } else if (req.target() == "/api/v1/game/players" ) {
+            handleGetPlayersRequest(req, std::forward<Send>(send));
+        } else if (req.target() == "/api/v1/game/join") {
+            handleJoinGameRequest(req, std::forward<Send>(send));
+        } else if (req.target() == "/api/v1/game/state") {
+            handleGetState(req, std::forward<Send>(send));
+        } else if (req.target() == "/api/v1/game/player/action") {
+            handleSetPlayerAction(req, std::forward<Send>(send));
+        } else if (req.target() == "/api/v1/game/tick") {
+            handleSetPlayersTick(req, std::forward<Send>(send));
+        } else {
+            sendErrorResponse("badRequest", "Bad request", http::status::bad_request, std::forward<Send>(send));
+        }
+
     }
 
 private:
-    //Strand& api_strand_;
-    //app::PlayerTokens& playerTokens_;
-    //app::Players& players_;
 
     template <typename Send>
     void handleGetMapsRequest(Send&& send) {
@@ -179,7 +175,6 @@ private:
     template <typename Send>
     void handleJoinGameRequest(const http::request<http::string_body>& req, Send&& send) {
 
-
         if (req.method() != http::verb::post) {
             const std::string allowedMethods = "POST";
             sendErrorResponse("invalidMethod", "Only POST method is expected", http::status::method_not_allowed, std::forward<Send>(send), allowedMethods);
@@ -191,48 +186,45 @@ private:
             return;
         }
 
+        try {
+            auto body = json::parse(req.body());
+            std::string userName = body.at("userName").as_string().c_str();
+            std::string mapId = body.at("mapId").as_string().c_str();
 
-            try {
-                auto body = json::parse(req.body());
-                std::string userName = body.at("userName").as_string().c_str();
-                std::string mapId = body.at("mapId").as_string().c_str();
+            model::Map::Id mapIdObj{mapId};
+            const model::Map* map = application_.GetGame().FindMap(mapIdObj);
 
-                model::Map::Id mapIdObj{mapId};
-                const model::Map* map = application_.GetGame().FindMap(mapIdObj);
-
-                if (userName.empty()) {
-                    sendErrorResponse("invalidArgument", "Invalid name", http::status::bad_request, std::forward<Send>(send));
-                    return;
-                }
-
-                if (!map) {
-                    sendErrorResponse("mapNotFound", "Map not found", http::status::not_found, std::forward<Send>(send));
-                    return;
-                }
-
-                if (application_.FindByDogNameAndMapId(userName, mapId) != nullptr) {
-                    sendErrorResponse("invalidArgument", "User with the same dog name on same map exists", http::status::bad_request, std::forward<Send>(send));
-                    return;
-                }
-
-                json::object responseBody;
-
-                net::dispatch(*application_.GetStrand(), [self = shared_from_this(), &userName, &map, &responseBody, req = std::move(req), send = std::forward<Send>(send)]() mutable {
-                    auto [authToken, playerId] = self->application_.JoinGame(userName, map);
-
-                    responseBody = {
-                        {"authToken", *authToken},
-                        {"playerId", playerId}
-                    };
-                });
-
-                sendJsonResponse(responseBody, std::forward<Send>(send));
-
-            } catch (const std::exception& e) {
-                sendErrorResponse("invalidArgument", "Join game request parse error", http::status::bad_request, std::forward<Send>(send));
+            if (userName.empty()) {
+                sendErrorResponse("invalidArgument", "Invalid name", http::status::bad_request, std::forward<Send>(send));
+                return;
             }
 
+            if (!map) {
+                sendErrorResponse("mapNotFound", "Map not found", http::status::not_found, std::forward<Send>(send));
+                return;
+            }
 
+            if (application_.FindByDogNameAndMapId(userName, mapId) != nullptr) {
+                sendErrorResponse("invalidArgument", "User with the same dog name on same map exists", http::status::bad_request, std::forward<Send>(send));
+                return;
+            }
+
+            json::object responseBody;
+
+            net::dispatch(*application_.GetStrand(), [self = shared_from_this(), &userName, &map, &responseBody, req = std::move(req), send = std::forward<Send>(send)]() mutable {
+                auto [authToken, playerId] = self->application_.JoinGame(userName, map);
+
+                responseBody = {
+                    {"authToken", *authToken},
+                    {"playerId", playerId}
+                };
+            });
+
+            sendJsonResponse(responseBody, std::forward<Send>(send));
+
+        } catch (const std::exception& e) {
+            sendErrorResponse("invalidArgument", "Join game request parse error", http::status::bad_request, std::forward<Send>(send));
+        }
     }
 
     template <typename Send>
@@ -244,29 +236,20 @@ private:
             return;
         }
 
-        //net::dispatch(*application_.GetStrand(), [self = shared_from_this(), req = std::move(req), send = std::forward<Send>(send)]() mutable {
+        ExecuteAuthorized(req, std::forward<Send>(send), [this, &send](const app::Token& token) {
 
-                ExecuteAuthorized(req, std::forward<Send>(send), [this, &send](const app::Token& token) {
+            auto player = application_.GetPlayerTokens().FindPlayerByToken(token);
+            std::shared_ptr<model::GameSession> player_session = player->GetSession();
+            boost::json::object response_json;
 
-                std::cout << "Inside dispatch. Is in strand: " << application_.GetStrand()->running_in_this_thread() << std::endl;
+            for (const std::shared_ptr<model::Dog>& dog : player_session->GetDogs()) {
+                boost::json::object dog_json;
+                dog_json["name"] = dog->GetName();
+                response_json[std::to_string(dog->GetId())] = dog_json;
+            }
 
-                //auto player = playerTokens_.FindPlayerByToken(token);
-                auto player = application_.GetPlayerTokens().FindPlayerByToken(token);
-                std::cout << "player name = " << player->GetDog()->GetName() << std::endl;
-                std::shared_ptr<model::GameSession> player_session = player->GetSession();
-                boost::json::object response_json;
-
-
-
-                for (const std::shared_ptr<model::Dog>& dog : player_session->GetDogs()) {
-                    boost::json::object dog_json;
-                    dog_json["name"] = dog->GetName();
-                    response_json[std::to_string(dog->GetId())] = dog_json;
-                }
-
-                sendJsonResponse(response_json, std::forward<Send>(send));
-            });
-        //});
+            sendJsonResponse(response_json, std::forward<Send>(send));
+        });
     }
 
     template <typename Send>
@@ -316,13 +299,11 @@ private:
                         dog->SetDirection(constants::Direction::SOUTH);
                         dog->SetSpeed({0, s});
                     } else if (move == "") {
-                        //dog->SetDirection(constants::Direction::STOP);
                         dog->SetSpeed({0, 0});
                     } else {
                         self->sendErrorResponse("invalidArgument", "Invalid move value", http::status::bad_request, std::forward<Send>(send));
                         return;
                     }
-
 
                 });
 
@@ -331,8 +312,6 @@ private:
                 } catch (const std::exception& e) {
                     sendErrorResponse("invalidArgument", "Failed to parse action", http::status::bad_request, std::forward<Send>(send));
                 }
-
-
         });
     }
 
@@ -372,9 +351,6 @@ private:
                             case constants::Direction::SOUTH:
                                 dog_json["dir"] = "D";
                                 break;
-//                            case constants::Direction::STOP:
-//                                dog_json["dir"] = "";
-//                                break;
                             default:
                                 dog_json["dir"] = "Unknown";
                                 break;
@@ -388,7 +364,6 @@ private:
             });
             sendJsonResponse(response_json, std::forward<Send>(send));
         });
-
     }
 
     template <typename Send>
@@ -429,7 +404,6 @@ private:
             sendErrorResponse("invalidArgument", "Failed to parse action", http::status::bad_request, std::forward<Send>(send));
         }
         json::object response_json = {};
-
         sendJsonResponse(response_json, std::forward<Send>(send));
     }
 
@@ -526,7 +500,6 @@ public:
         LogRequest(req, client_ip);
 
         decorated_(std::move(req), [&](auto&& response) {
-            //std::this_thread::sleep_for(std::chrono::milliseconds(10)); //del
             auto end = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
             LogResponse(response, duration, client_ip);

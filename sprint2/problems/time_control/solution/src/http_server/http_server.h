@@ -88,7 +88,6 @@ private:
         if (ec) {
             return ReportError(ec, "read"sv);
         }
-        //std::cout << "HandleRequest \n";
         HandleRequest(std::move(request_));
     }
     void Close() {
@@ -126,7 +125,6 @@ private:
         // Захватываем умный указатель на текущий объект Session в лямбде,
         // чтобы продлить время жизни сессии до вызова лямбды.
         // Используется generic-лямбда функция, способная принять response произвольного типа
-        //std::cout << " In HandleRequest Session\n";
         request_handler_(std::move(request), client_ip_, [self = this->shared_from_this()](auto&& response) {
             self->Write(std::move(response));
         });

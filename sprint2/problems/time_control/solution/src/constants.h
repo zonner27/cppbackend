@@ -5,6 +5,8 @@
 #include <iomanip>
 #include <sstream>
 
+//#define ENABLE_SYNC_WRITE
+
 namespace constants {
 
     const std::string X = "x";

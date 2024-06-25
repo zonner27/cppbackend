@@ -59,15 +59,12 @@ int main(int argc, const char* argv[]) {
             std::cerr << "Error: " << e.what() << std::endl;
             return EXIT_FAILURE;
         }
-        //app::PlayerTokens playerTokens;
-        //app::Players players;
 
         // 2. Инициализируем io_context
         const unsigned num_threads = std::thread::hardware_concurrency();
         net::io_context ioc(num_threads);
 
         app::Application application(game, ioc);
-
 
         // 3. Добавляем асинхронный обработчик сигналов SIGINT и SIGTERM
         // Подписываемся на сигналы и при их получении завершаем работу сервера
@@ -81,19 +78,11 @@ int main(int argc, const char* argv[]) {
         });
 
         // 4. Создаём обработчик HTTP-запросов и связываем его с моделью игры
-        //http_handler::RequestHandler handler{game, static_path};
-        //http_handler::LoggingRequestHandler logging_handler{handler};
-        //auto api_strand = net::make_strand(ioc);
-
-
-        //http_handler::ApiRequestHandler api_handler{game, static_path, api_strand};
-        //http_handler::StaticFileRequestHandler static_file_handler{game, static_path};
         auto api_handler = std::make_shared<http_handler::ApiRequestHandler>(application, static_path);
         auto static_file_handler = std::make_shared<http_handler::StaticFileRequestHandler>(application, static_path);
 
         http_handler::LoggingRequestHandler<http_handler::ApiRequestHandler> logging_api_handler{*api_handler};
         http_handler::LoggingRequestHandler<http_handler::StaticFileRequestHandler> logging_static_file_handler{*static_file_handler};
-
 
         // 5. Запустить обработчик HTTP-запросов, делегируя их обработчику запросов
         const auto address = net::ip::make_address("0.0.0.0");
@@ -106,11 +95,6 @@ int main(int argc, const char* argv[]) {
             }
         });
 
-        //http_server::ServeHttp(ioc, {address, port}, [&logging_handler](auto&& req, const std::string& client_ip, auto&& send) {
-            //logging_handler(std::forward<decltype(req)>(req), client_ip, std::forward<decltype(send)>(send));
-        //});
-
-        // Эта надпись сообщает тестам о том, что сервер запущен и готов обрабатывать запросы std::cout << "Server has started..."sv << std::endl
         json::value custom_data = json::object{
                 {"port"s, port},
                 {"address"s, address.to_string()}
@@ -121,6 +105,7 @@ int main(int argc, const char* argv[]) {
         RunWorkers(std::max(1u, num_threads), [&ioc] {
             ioc.run();
         });
+
     } catch (const std::exception& ex) {
         json::value custom_data = json::object{
                 {"code"s, EXIT_FAILURE},
