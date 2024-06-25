@@ -18,7 +18,8 @@ class Application {
 public:
     using Strand = net::strand<net::io_context::executor_type>;
 
-    Application(model::Game& game, net::io_context& ioc) : game_{game}, ioc_{ioc}, api_strand_{net::make_strand(ioc)} {
+    Application(model::Game& game, net::io_context& ioc) : game_{game}, ioc_{ioc}, api_strand_{std::make_shared<Strand>(net::make_strand(ioc))} {   //api_strand_{net::make_strand(ioc)}
+
     }
 
     std::pair<Token, Player::ID> JoinGame(std::string userName, const model::Map* map) {
@@ -55,7 +56,7 @@ public:
         return game_;
     }
 
-    Strand& GetStrand() {
+    std::shared_ptr<Strand> GetStrand() {
         return api_strand_;
     }
 
@@ -64,7 +65,8 @@ private:
     net::io_context& ioc_;
     std::vector<std::shared_ptr<Player>> players_;
     PlayerTokens player_tokens_;
-    Strand api_strand_;
+    std::shared_ptr<Strand> api_strand_;
+
 };
 
 
