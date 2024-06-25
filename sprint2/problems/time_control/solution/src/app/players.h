@@ -40,38 +40,38 @@ private:
 };
 
 
-class Players {
-public:
-    Player& Add(std::shared_ptr<model::Dog> dog, std::shared_ptr<model::GameSession> session) {
-        auto it = players_.find(dog);
-        if (it != players_.end()) {
-            return it->second;
-        }
+//class Players {
+//public:
+//    Player& Add(std::shared_ptr<model::Dog> dog, std::shared_ptr<model::GameSession> session) {
+//        auto it = players_.find(dog);
+//        if (it != players_.end()) {
+//            return it->second;
+//        }
 
-        Player player(dog, session);
-        players_[dog] = player;
-        return players_[dog];
-    }
+//        Player player(dog, session);
+//        players_[dog] = player;
+//        return players_[dog];
+//    }
 
-    Player* FindByDogNameAndMapId(const std::string& dogName, const std::string& mapId) {
-        for (auto& [dog, player] : players_) {
-            //std::cout << "___dogname " << dog->GetName() << " - " << dogName << std::endl;
-            //std::cout << "___map " << *player.GetSession()->GetId() << " - " << mapId << std::endl;
-            if (dog->GetName() == dogName && *player.GetSession()->GetId() == mapId) {
+//    Player* FindByDogNameAndMapId(const std::string& dogName, const std::string& mapId) {
+//        for (auto& [dog, player] : players_) {
+//            //std::cout << "___dogname " << dog->GetName() << " - " << dogName << std::endl;
+//            //std::cout << "___map " << *player.GetSession()->GetId() << " - " << mapId << std::endl;
+//            if (dog->GetName() == dogName && *player.GetSession()->GetId() == mapId) {
 
-                return &player;
-            }
-        }
-        return nullptr;
-    }
+//                return &player;
+//            }
+//        }
+//        return nullptr;
+//    }
 
-    std::unordered_map<std::shared_ptr<model::Dog> , Player> GetPlayers() {
-        return players_;
-    }
+//    std::unordered_map<std::shared_ptr<model::Dog> , Player> GetPlayers() {
+//        return players_;
+//    }
 
-private:
-    std::unordered_map<std::shared_ptr<model::Dog> , Player> players_;
-};
+//private:
+//    std::unordered_map<std::shared_ptr<model::Dog> , Player> players_;
+//};
 
 
 

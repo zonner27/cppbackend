@@ -16,10 +16,10 @@ namespace net = boost::asio;
 class Application {
 
 public:
-    Application(model::Game& game, net::io_context& ioc) :
-        game_{game},
-        ioc_{ioc}
-        {}
+    using Strand = net::strand<net::io_context::executor_type>;
+
+    Application(model::Game& game, net::io_context& ioc) : game_{game}, ioc_{ioc}, api_strand_{net::make_strand(ioc)} {
+    }
 
     std::pair<Token, Player::ID> JoinGame(std::string userName, const model::Map* map) {
 
@@ -34,6 +34,15 @@ public:
         return make_pair(authToken, playerId);
     }
 
+    Player* FindByDogNameAndMapId(const std::string& dogName, const std::string& mapId) {
+        for (const auto& player : players_) {
+            if (player->GetDog()->GetName() == dogName && *player->GetSession()->GetId() == mapId) {
+                return player.get();
+            }
+        }
+        return nullptr;
+    }
+
     std::vector<std::shared_ptr<Player>>& GetPlayers() {
         return players_;
     }
@@ -46,12 +55,16 @@ public:
         return game_;
     }
 
+    Strand& GetStrand() {
+        return api_strand_;
+    }
+
 private:
     model::Game game_;
     net::io_context& ioc_;
     std::vector<std::shared_ptr<Player>> players_;
     PlayerTokens player_tokens_;
-
+    Strand api_strand_;
 };
 
 

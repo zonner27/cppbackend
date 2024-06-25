@@ -30,14 +30,13 @@ using StringRequest = http::request<http::string_body>;
 
 class BaseRequestHandler {
 public:
-    explicit BaseRequestHandler(app::Application& application, model::Game& game, fs::path static_path)
-        : application_{application}, game_{game}, static_path_{static_path} {}
+    explicit BaseRequestHandler(app::Application& application, fs::path static_path)
+        : application_{application}, static_path_{static_path} {}
 
     BaseRequestHandler(const BaseRequestHandler&) = delete;
     BaseRequestHandler& operator=(const BaseRequestHandler&) = delete;
 
 protected:    
-    model::Game& game_;
     fs::path static_path_;
     app::Application& application_;
 
@@ -116,14 +115,16 @@ class ApiRequestHandler : public BaseRequestHandler, public std::enable_shared_f
 public:
     using Strand = net::strand<net::io_context::executor_type>;
 
-    explicit ApiRequestHandler(app::Application& application, model::Game& game, fs::path static_path,  Strand& api_strand, app::PlayerTokens& playerTokens, app::Players& players) //net::io_context& ioc,
-            : BaseRequestHandler(application, game, static_path), api_strand_{api_strand}, playerTokens_{playerTokens}, players_{players} {}
-
     using BaseRequestHandler::BaseRequestHandler;
+
+//    explicit ApiRequestHandler(app::Application& application, fs::path static_path) //net::io_context& ioc,
+//            : BaseRequestHandler(application, static_path) {}
+
+
 
     template <typename Body, typename Allocator, typename Send>
     void operator()(http::request<Body, http::basic_fields<Allocator>>&& req, Send&& send) {
-        net::dispatch(api_strand_, [self = shared_from_this(), req = std::move(req), send = std::forward<Send>(send)]() mutable {
+        net::dispatch(application_.GetStrand(), [self = shared_from_this(), req = std::move(req), send = std::forward<Send>(send)]() mutable {    //api_strand
             if (req.target() == "/api/v1/maps" && req.method() == http::verb::get) {
                 self->handleGetMapsRequest(std::forward<Send>(send));
             } else if (req.method() == http::verb::get && req.target().starts_with("/api/v1/maps/")) {
@@ -145,15 +146,15 @@ public:
     }
 
 private:
-    Strand& api_strand_;
-    app::PlayerTokens& playerTokens_;
-    app::Players& players_;
+    //Strand& api_strand_;
+    //app::PlayerTokens& playerTokens_;
+    //app::Players& players_;
 
     template <typename Send>
     void handleGetMapsRequest(Send&& send) {
         json::array jsonArray;
 
-        for (const auto& map : game_.GetMaps()) {
+        for (const auto& map : application_.GetGame().GetMaps()) {
             json::object mapObject;
             mapObject["id"] = json::string(*map.GetId());
             mapObject["name"] = json::string(map.GetName());
@@ -165,7 +166,7 @@ private:
     template <typename Send>
     void handleGetMapByIdRequest(const std::string& mapIdStr, Send&& send) {
         model::Map::Id mapId = model::Map::Id(mapIdStr);
-        const model::Map* map = game_.FindMap(mapId);
+        const model::Map* map = application_.GetGame().FindMap(mapId);
 
         if (map != nullptr) {
             json::object mapJson = createMapJson(*map);
@@ -194,7 +195,7 @@ private:
             std::string mapId = body.at("mapId").as_string().c_str();
 
             model::Map::Id mapIdObj{mapId};
-            const model::Map* map = game_.FindMap(mapIdObj);
+            const model::Map* map = application_.GetGame().FindMap(mapIdObj);
 
             if (userName.empty()) {
                 sendErrorResponse("invalidArgument", "Invalid name", http::status::bad_request, std::forward<Send>(send));
@@ -206,7 +207,7 @@ private:
                 return;
             }
 
-            if (players_.FindByDogNameAndMapId(userName, mapId) != nullptr) {
+            if (application_.FindByDogNameAndMapId(userName, mapId) != nullptr) {
                 sendErrorResponse("invalidArgument", "User with the same dog name on same map exists", http::status::bad_request, std::forward<Send>(send));
                 return;
             }

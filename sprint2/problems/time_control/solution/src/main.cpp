@@ -59,8 +59,8 @@ int main(int argc, const char* argv[]) {
             std::cerr << "Error: " << e.what() << std::endl;
             return EXIT_FAILURE;
         }
-        app::PlayerTokens playerTokens;
-        app::Players players;
+        //app::PlayerTokens playerTokens;
+        //app::Players players;
 
         // 2. Инициализируем io_context
         const unsigned num_threads = std::thread::hardware_concurrency();
@@ -83,13 +83,13 @@ int main(int argc, const char* argv[]) {
         // 4. Создаём обработчик HTTP-запросов и связываем его с моделью игры
         //http_handler::RequestHandler handler{game, static_path};
         //http_handler::LoggingRequestHandler logging_handler{handler};
-        auto api_strand = net::make_strand(ioc);
+        //auto api_strand = net::make_strand(ioc);
 
 
         //http_handler::ApiRequestHandler api_handler{game, static_path, api_strand};
         //http_handler::StaticFileRequestHandler static_file_handler{game, static_path};
-        auto api_handler = std::make_shared<http_handler::ApiRequestHandler>(application, game, static_path, api_strand, playerTokens, players);
-        auto static_file_handler = std::make_shared<http_handler::StaticFileRequestHandler>(application, game, static_path);
+        auto api_handler = std::make_shared<http_handler::ApiRequestHandler>(application, static_path);
+        auto static_file_handler = std::make_shared<http_handler::StaticFileRequestHandler>(application, static_path);
 
         http_handler::LoggingRequestHandler<http_handler::ApiRequestHandler> logging_api_handler{*api_handler};
         http_handler::LoggingRequestHandler<http_handler::StaticFileRequestHandler> logging_static_file_handler{*static_file_handler};
