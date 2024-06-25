@@ -372,9 +372,9 @@ private:
                             case constants::Direction::SOUTH:
                                 dog_json["dir"] = "D";
                                 break;
-                            case constants::Direction::STOP:
-                                dog_json["dir"] = "";
-                                break;
+//                            case constants::Direction::STOP:
+//                                dog_json["dir"] = "";
+//                                break;
                             default:
                                 dog_json["dir"] = "Unknown";
                                 break;
@@ -405,32 +405,32 @@ private:
             return;
         }
 
-            try {
+        try {
 
-                json::value parsedJson = json::parse(req.body());
-                json::object obj = parsedJson.as_object();
+            json::value parsedJson = json::parse(req.body());
+            json::object obj = parsedJson.as_object();
 
-                if (!obj.contains("timeDelta") || !obj["timeDelta"].is_int64()) {
-                    sendErrorResponse("invalidArgument", "Failed to parse action", http::status::bad_request, std::forward<Send>(send));
-                    return;
-                }
-
-                int time_delta = obj["timeDelta"].as_int64();
-
-                net::dispatch(*application_.GetStrand(), [self = shared_from_this(), &time_delta,  req = std::move(req), send = std::forward<Send>(send)]() mutable {
-
-                    std::vector<std::shared_ptr<model::GameSession>> sessions = self->application_.GetGame().GetAllSession();
-                    for (std::shared_ptr<model::GameSession>& session : sessions) {
-                        session->SetDogsCoordinatsByTime(time_delta);
-                    }
-                });
-
-            } catch (const std::exception& e) {
+            if (!obj.contains("timeDelta") || !obj["timeDelta"].is_int64()) {
                 sendErrorResponse("invalidArgument", "Failed to parse action", http::status::bad_request, std::forward<Send>(send));
+                return;
             }
-            json::object response_json = {};
 
-            sendJsonResponse(response_json, std::forward<Send>(send));
+            int time_delta = obj["timeDelta"].as_int64();
+
+            net::dispatch(*application_.GetStrand(), [self = shared_from_this(), &time_delta,  req = std::move(req), send = std::forward<Send>(send)]() mutable {
+
+                std::vector<std::shared_ptr<model::GameSession>> sessions = self->application_.GetGame().GetAllSession();
+                for (std::shared_ptr<model::GameSession>& session : sessions) {
+                    session->SetDogsCoordinatsByTime(time_delta);
+                }
+            });
+
+        } catch (const std::exception& e) {
+            sendErrorResponse("invalidArgument", "Failed to parse action", http::status::bad_request, std::forward<Send>(send));
+        }
+        json::object response_json = {};
+
+        sendJsonResponse(response_json, std::forward<Send>(send));
     }
 
     template <typename Fn, typename Send>
@@ -458,7 +458,6 @@ private:
         }
 
         app::Token token(tokenStr);
-        //auto player = playerTokens_.FindPlayerByToken(token);
         auto player = application_.GetPlayerTokens().FindPlayerByToken(token);
         if (!player) {
             sendErrorResponse("unknownToken", "Player token has not been found", http::status::unauthorized, std::forward<Send>(send));

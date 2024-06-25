@@ -12,8 +12,11 @@ void GameSession::SetDogsCoordinatsByTime(int time_delta){
     for (auto& dog : dogs_) {
         //std::cout << std::fixed << std::setprecision(4);
         Coordinates start = dog->GetCoordinate();
-        Dimension start_x = static_cast<Dimension>(start.x);
-        Dimension start_y = static_cast<Dimension>(start.y);
+        //Dimension start_x = static_cast<Dimension>(start.x);
+        //Dimension start_y = static_cast<Dimension>(start.y);
+        Dimension start_x = static_cast<Dimension>(std::round(start.x));
+        Dimension start_y = static_cast<Dimension>(std::round(start.y));
+
         //std::cout << "start x = " << start.x << " y = " << start.y << std::endl;
         Coordinates calc_finish = dog->GetCoordinateByTime(time_delta);
         //std::cout << "finish x = " << calc_finish.x << " y = " << calc_finish.y << std::endl;
@@ -81,12 +84,15 @@ void GameSession::SetDogsCoordinatsByTime(int time_delta){
                 }
             } else {
                 if (direction == constants::Direction::SOUTH) {
+                    //std::cout << "callc finish y = " << calc_finish.y << "  static_cast<double>(start_y) = " << static_cast<double>(start_y) << std::endl;
+                    //std::cout << " static_cast<double>(start_y) = " << static_cast<double>(start_y) << " static_cast<double>(start_y) = " << static_cast<double>(start_y) << std::endl;
                     if (calc_finish.y - static_cast<double>(start_y) <= 0.4) {
                         finish.y = calc_finish.y;
                     } else {
                         finish.y = static_cast<double>(start_y) + 0.4;
                         dog->SetSpeed({0, 0});
                     }
+                    //std::cout << " finish.y = " << finish.y << std::endl;
                 }
                 if (direction == constants::Direction::NORTH) {
                     if (static_cast<double>(start_y) - calc_finish.y <= 0.4) {

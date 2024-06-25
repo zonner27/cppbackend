@@ -2,6 +2,7 @@
 
 #include "model.h"
 #include "dog.h"
+#include <cmath>
 
 namespace model {
 
