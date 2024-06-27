@@ -391,13 +391,16 @@ private:
             }
 
             int time_delta = obj["timeDelta"].as_int64();
+            std::chrono::milliseconds delta(time_delta);
 
-            net::dispatch(*application_.GetStrand(), [self = shared_from_this(), &time_delta,  req = std::move(req), send = std::forward<Send>(send)]() mutable {
+            net::dispatch(*application_.GetStrand(), [self = shared_from_this(), &delta,  req = std::move(req), send = std::forward<Send>(send)]() mutable {
 
-                std::vector<std::shared_ptr<model::GameSession>> sessions = self->application_.GetGame().GetAllSession();
-                for (std::shared_ptr<model::GameSession>& session : sessions) {
-                    session->SetDogsCoordinatsByTime(time_delta);
-                }
+                self->application_.UpdateGameState(delta);
+                //self->application_->UpdateGameState();
+//                std::vector<std::shared_ptr<model::GameSession>> sessions = self->application_.GetGame().GetAllSession();
+//                for (std::shared_ptr<model::GameSession>& session : sessions) {
+//                    session->SetDogsCoordinatsByTime(time_delta);
+//                }
             });
 
         } catch (const std::exception& e) {

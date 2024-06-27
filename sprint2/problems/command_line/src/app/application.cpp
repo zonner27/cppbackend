@@ -41,7 +41,7 @@ std::shared_ptr<Application::Strand> Application::GetStrand() {
     return api_strand_;
 }
 
-unsigned int Application::GetTickPeriod() {
+std::chrono::milliseconds Application::GetTickPeriod() {
     return tick_period_;
 }
 

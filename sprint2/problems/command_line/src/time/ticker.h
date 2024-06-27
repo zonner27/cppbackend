@@ -4,7 +4,7 @@
 #include <boost/asio.hpp>
 
 
-namespace timer {
+namespace time_tiker {
 
 namespace net = boost::asio;
 namespace sys = boost::system;
@@ -62,4 +62,4 @@ private:
     std::chrono::steady_clock::time_point last_tick_;
 };
 
-} // namespace timer
+} // namespace time_tiker

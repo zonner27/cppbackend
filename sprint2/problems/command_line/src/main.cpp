@@ -66,11 +66,11 @@ int main(int argc, const char* argv[]) {
             throw std::runtime_error("The folder static_path is not in the program directory"s);
         }
 
-        std::cout << "Tick Period: " << args->tick_period << " ms\n";
-        std::cout << "Config File: " << args->config_file << "\n";
-        std::cout << "WWW Root: " << args->www_root << "\n";
-        std::cout << "Randomize Spawn Points: " << (args->randomize_spawn_points ? "true" : "false") << "\n";
-        std::cout << "Base Path: " << args->base_path.string() << "\n";
+//        std::cout << "Tick Period: " << args->tick_period << " ms\n";
+//        std::cout << "Config File: " << args->config_file << "\n";
+//        std::cout << "WWW Root: " << args->www_root << "\n";
+//        std::cout << "Randomize Spawn Points: " << (args->randomize_spawn_points ? "true" : "false") << "\n";
+//        std::cout << "Base Path: " << args->base_path.string() << "\n";
 
 
         // 1. Загружаем карту из файла и построить модель игры
