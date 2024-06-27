@@ -14,6 +14,7 @@ public:
     const Coordinates& GetCoordinate() const noexcept;
     void SetCoordinate(const Coordinates& coordinates) noexcept;
     void SetCoordinateByPoint(const Point& point) noexcept;
+
     Coordinates GetCoordinateByTime(int time_delta) noexcept;
 
     const std::pair<double, double>& GetSpeed() const noexcept;

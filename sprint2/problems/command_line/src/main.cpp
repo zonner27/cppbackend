@@ -86,7 +86,7 @@ int main(int argc, const char* argv[]) {
         const unsigned num_threads = std::thread::hardware_concurrency();
         net::io_context ioc(num_threads);
 
-        app::Application application(game, ioc);    //, args->tick_period, args->randomize_spawn_points
+        app::Application application(game, ioc, args->tick_period, args->randomize_spawn_points);
 
         // 3. Добавляем асинхронный обработчик сигналов SIGINT и SIGTERM
         // Подписываемся на сигналы и при их получении завершаем работу сервера

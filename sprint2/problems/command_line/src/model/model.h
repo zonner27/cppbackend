@@ -8,6 +8,7 @@
 #include <map>
 #include <optional>
 #include <cmath>
+#include <random>
 
 #include "../tagged.h"
 #include "../constants.h"
@@ -21,6 +22,13 @@ using Coord = Dimension;
 
 struct Point {
     Coord x, y;
+    Point& operator=(const Point& other) {
+        if (this != &other) {
+            x = other.x;
+            y = other.y;
+        }
+        return *this;
+    }
     bool operator<(const Point& other) const {
         return std::tie(x, y) < std::tie(other.x, other.y);
     }
@@ -226,6 +234,51 @@ public:
 
     const double GetDogSpeed() const noexcept{
         return dogSpeed_;
+    }
+
+    static int GetRandomNumber(int min, int max) {
+        static std::random_device rd;
+        static std::mt19937 gen(rd());
+        std::uniform_int_distribution<> dis(min, max);
+        return dis(gen);
+    }
+
+    Point GetRandomPointOnRoad(const Road& road) const {
+        Point start = road.GetStart();
+        Point end = road.GetEnd();
+        //std::cout << " road start x = " << start.x << " y = " << start.y << std::endl;
+        //std::cout << " road end x = " << end.x << " y = " << end.y << std::endl;
+
+        if (road.IsHorizontal()) {
+            Dimension random_x;
+            if (start.x <=  end.x) {
+                random_x = GetRandomNumber(start.x, end.x);
+            } else {
+                random_x = GetRandomNumber(end.x, start.x);
+            }
+            //std::cout << " random_x= " << random_x << " start.y " << start.y << std::endl;
+            return {random_x, start.y};
+        } else if (road.IsVertical()) {
+            Dimension random_y;
+            if (start.x <=  end.x) {
+                random_y = GetRandomNumber(start.y, end.y);
+            } else {
+                random_y = GetRandomNumber(end.y, start.y);
+            }
+            //std::cout << "start.x = " << start.x << " random_y = " << random_y << std::endl;
+            return {start.x, random_y};
+        }
+        return start;
+    }
+
+    Point GetRandomPointRoadMap() const {
+        if (roads_.empty()) {
+            throw std::runtime_error("Road list is empty");
+        }
+        size_t random_index = GetRandomNumber(0, roads_.size() - 1);
+        //std::cout << "random index = " << random_index << std::endl;
+        const Road& random_road = roads_[random_index];
+        return GetRandomPointOnRoad(random_road);
     }
 
     const Point& GetStartPointRoadMap() const noexcept{

@@ -15,8 +15,8 @@ class PlayerTokens {
 public:
     PlayerTokens() = default;
     Token generateToken();
-    Token AddPlayer(std::shared_ptr<Player> player);    //std::shared_ptr<Player> player   Player&
-    std::shared_ptr<Player> FindPlayerByToken(const Token& token);  //std::shared_ptr<Player> player   Player*
+    Token AddPlayer(std::shared_ptr<Player> player);
+    std::shared_ptr<Player> FindPlayerByToken(const Token& token);
     void PrintToken();
 
 private:

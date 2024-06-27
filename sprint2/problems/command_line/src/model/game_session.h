@@ -14,7 +14,7 @@ public:
 
     GameSession(const Map* map) : map_{map} {}
 
-    void AddDog(std::shared_ptr<Dog> dog);
+    void AddDog(std::shared_ptr<Dog> dog, bool randomize_spawn_points);
     void SetDogsCoordinatsByTime(int time_delta);
     const std::string& GetMapName() const noexcept;
     const Map* GetMap() noexcept;
