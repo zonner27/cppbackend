@@ -166,14 +166,14 @@ private:
                     return;
                 }
 
-                net::dispatch(*application_.GetStrand(), [self = shared_from_this(), &obj, &token, req = std::move(req), send = std::forward<Send>(send)]() mutable {
+                std::string move = obj["move"].as_string().c_str();
+                auto player = application_.GetPlayerTokens().FindPlayerByToken(token);
 
-                    std::string move = obj["move"].as_string().c_str();
-                    auto player = self->application_.GetPlayerTokens().FindPlayerByToken(token);
+                std::shared_ptr<model::Dog> dog = player->GetDog();
+                const model::Map* map = player->GetSession()->GetMap();
+                double s = map->GetDogSpeed();
 
-                    std::shared_ptr<model::Dog> dog = player->GetDog();
-                    const model::Map* map = player->GetSession()->GetMap();
-                    double s = map->GetDogSpeed();
+                net::dispatch(*application_.GetStrand(), [self = shared_from_this(), &move, &dog, &s, req = std::move(req), send = std::forward<Send>(send)]() mutable {
 
                     if (move == "L") {
                         dog->SetDirection(constants::Direction::WEST);
