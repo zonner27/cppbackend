@@ -217,40 +217,37 @@ private:
 
             json::object response_json;
 
-            net::dispatch(*application_.GetStrand(), [self = shared_from_this(), req = std::move(req), &response_json, send = std::forward<Send>(send)]() mutable {
+            boost::json::object players_json;
+            std::vector<std::shared_ptr<model::GameSession>> sessions = application_.GetGame().GetAllSession(); //self->
+            for (std::shared_ptr<model::GameSession>& session : sessions) {
+                for (const std::shared_ptr<model::Dog>& dog : session->GetDogs()) {
+                    boost::json::object dog_json;
+                    dog_json["pos"] = {dog->GetCoordinate().x, dog->GetCoordinate().y};
+                    dog_json["speed"] = {dog->GetSpeed().first, dog->GetSpeed().second};
 
-                boost::json::object players_json;
-                std::vector<std::shared_ptr<model::GameSession>> sessions = self->application_.GetGame().GetAllSession();
-                for (std::shared_ptr<model::GameSession>& session : sessions) {
-                    for (const std::shared_ptr<model::Dog>& dog : session->GetDogs()) {
-                        boost::json::object dog_json;
-                        dog_json["pos"] = {dog->GetCoordinate().x, dog->GetCoordinate().y};
-                        dog_json["speed"] = {dog->GetSpeed().first, dog->GetSpeed().second};
-
-                        switch (dog->GetDirection()) {
-                            case constants::Direction::NORTH:
-                                dog_json["dir"] = "U";
-                                break;
-                            case constants::Direction::WEST:
-                                dog_json["dir"] = "L";
-                                break;
-                            case constants::Direction::EAST:
-                                dog_json["dir"] = "R";
-                                break;
-                            case constants::Direction::SOUTH:
-                                dog_json["dir"] = "D";
-                                break;
-                            default:
-                                dog_json["dir"] = "Unknown";
-                                break;
-                        }
-                        players_json[std::to_string(dog->GetId())] = dog_json;
+                    switch (dog->GetDirection()) {
+                        case constants::Direction::NORTH:
+                            dog_json["dir"] = "U";
+                            break;
+                        case constants::Direction::WEST:
+                            dog_json["dir"] = "L";
+                            break;
+                        case constants::Direction::EAST:
+                            dog_json["dir"] = "R";
+                            break;
+                        case constants::Direction::SOUTH:
+                            dog_json["dir"] = "D";
+                            break;
+                        default:
+                            dog_json["dir"] = "Unknown";
+                            break;
                     }
+                    players_json[std::to_string(dog->GetId())] = dog_json;
                 }
+            }
 
-                response_json["players"] = players_json;
+            response_json["players"] = players_json;
 
-            });
             sendJsonResponse(response_json, std::forward<Send>(send));
         });
     }
