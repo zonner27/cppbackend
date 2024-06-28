@@ -15,9 +15,6 @@
 #include <boost/json.hpp>
 #include <boost/beast.hpp>
 
-#include <thread> //del
-#include <chrono> //del
-
 namespace http_handler {
 
 namespace beast = boost::beast;
@@ -115,5 +112,4 @@ protected:
     }
 };
 
-
-}
+} //namespace http_handler

@@ -57,7 +57,6 @@ public:
         }
     }
 
-
 private:
     model::Game game_;
     std::chrono::milliseconds tick_period_;

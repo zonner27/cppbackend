@@ -27,6 +27,4 @@ private:
     const Map* map_;
 };
 
-
-
 } //namespace model

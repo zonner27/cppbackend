@@ -322,7 +322,6 @@ private:
         }
 
         action(token);
-
     }
 
     json::object createMapJson(const model::Map& map);

@@ -8,7 +8,6 @@ namespace http = beast::http;
 namespace sys = boost::system;
 namespace net = boost::asio;
 
-
 // Для синхронного вывода в Boost.Asio могут использовать любой тип, удовлетворяющий требованиям,
 // описанным в документе:
 // https://www.boost.org/doc/libs/1_78_0/doc/html/boost_asio/reference/SyncWriteStream.html

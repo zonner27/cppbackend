@@ -3,7 +3,6 @@
 #include <chrono>
 #include <boost/asio.hpp>
 
-
 namespace time_tiker {
 
 namespace net = boost::asio;
