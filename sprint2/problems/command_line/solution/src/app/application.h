@@ -35,8 +35,6 @@ public:
                 *api_strand_,
                 tick_period_,
                 [this](std::chrono::milliseconds delta) { UpdateGameState(delta); }
-                //std::bind(&Application::UpdateGameState, this, std::placeholders::_1)
-                //[this](std::chrono::milliseconds delta) { UpdateGameState(delta); }
             );
             ticker_->Start();
         }
@@ -65,7 +63,6 @@ public:
 
 private:
     model::Game game_;
-    //uint32_t tick_period_ = 0;
     std::chrono::milliseconds tick_period_;
     bool randomize_spawn_points_ = false;
     net::io_context& ioc_;
