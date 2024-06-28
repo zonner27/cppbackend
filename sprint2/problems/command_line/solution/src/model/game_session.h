@@ -2,7 +2,7 @@
 
 #include "model.h"
 #include "dog.h"
-//#include "../app/application.h"
+#include "maps.h"
 #include <cmath>
 
 namespace model {

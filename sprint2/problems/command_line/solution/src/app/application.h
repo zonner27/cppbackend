@@ -11,7 +11,6 @@
 #include "../model/game.h"
 #include "../time/ticker.h"
 
-
 namespace app {
 
 namespace net = boost::asio;
@@ -27,8 +26,6 @@ public:
         tick_period_{tick_period},
         randomize_spawn_points_{randomize_spawn_points},
         api_strand_{std::make_shared<Strand>(net::make_strand(ioc))} {
-
-        std::cout << "time = " << tick_period_.count() << std::endl;
 
         if(tick_period_.count() != 0){
             ticker_ = std::make_shared<time_tiker::Ticker>(

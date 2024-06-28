@@ -39,6 +39,8 @@ add_executable(game_server
         src/model/game.cpp
         src/model/game_session.h
         src/model/game_session.cpp
+        src/model/maps.h
+        src/model/maps.cpp
 
 	src/tagged.h
         src/json_loader/boost_json.cpp

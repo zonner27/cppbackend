@@ -6,12 +6,9 @@ namespace model {
 void GameSession::AddDog(std::shared_ptr<Dog> dog, bool randomize_spawn_points) {
     if (randomize_spawn_points) {
         dog->SetCoordinateByPoint(map_->GetRandomPointRoadMap());
-        //std::cout << "Dogs coord x = " << dog->GetCoordinate().x << " y = " << dog->GetCoordinate().y << std::endl;
     } else {
        dog->SetCoordinateByPoint(map_->GetStartPointRoadMap());
-       //std::cout << "Dogs coord x = " << dog->GetCoordinate().x << " y = " << dog->GetCoordinate().y << std::endl;
     }
-
     dogs_.insert(dog);
 }
 

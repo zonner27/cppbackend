@@ -38,19 +38,6 @@ int main(int argc, const char* argv[]) {
 
     logger_init();
 
-//    if (argc != 3) {
-//        std::cerr << "Usage: game_server <game-config-json> <game-folder>"sv << std::endl;
-//        return EXIT_FAILURE;
-//    }
-//    fs::path base_path = argv[0];
-//    base_path = base_path.parent_path() / "../../"s;
-//    fs::path json_path = argv[1];
-//    fs::path static_path = argv[2];
-
-//    if (!files_path::IsSubPath(static_path, base_path)) {
-//        std::cerr << "The folder "sv << argv[2] << " is not in the program directory"sv << std::endl;
-//        return EXIT_FAILURE;
-//    }
     try {
         auto args = ParseCommandLine(argc, argv);
 
@@ -65,13 +52,6 @@ int main(int argc, const char* argv[]) {
         if (!files_path::IsSubPath(static_path, base_path)) {
             throw std::runtime_error("The folder static_path is not in the program directory"s);
         }
-
-//        std::cout << "Tick Period: " << args->tick_period << " ms\n";
-//        std::cout << "Config File: " << args->config_file << "\n";
-//        std::cout << "WWW Root: " << args->www_root << "\n";
-//        std::cout << "Randomize Spawn Points: " << (args->randomize_spawn_points ? "true" : "false") << "\n";
-//        std::cout << "Base Path: " << args->base_path.string() << "\n";
-
 
         // 1. Загружаем карту из файла и построить модель игры
         model::Game game;

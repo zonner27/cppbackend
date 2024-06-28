@@ -4,7 +4,6 @@ namespace app {
 
 std::pair<app::Token, app::Player::ID> app::Application::JoinGame(std::string userName, const model::Map *map) {
 
-    //std::cout << "randlomie = " << randomize_spawn_points_ << std::endl;
     std::shared_ptr<model::Dog> dog = std::make_shared<model::Dog>(userName);
     std::shared_ptr<model::GameSession> validSession = game_.FindValidSession(map);
     validSession->AddDog(dog, randomize_spawn_points_);

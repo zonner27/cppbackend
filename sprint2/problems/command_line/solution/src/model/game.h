@@ -4,6 +4,7 @@
 #include <string>
 
 #include "model.h"
+#include "maps.h"
 #include "game_session.h"
 
 namespace model {

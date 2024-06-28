@@ -7,7 +7,6 @@ std::optional<Args> ParseCommandLine(int argc, const char * const argv[]) {
 
     po::options_description desc{"All options"s};
 
-
     Args args;
     args.base_path = fs::system_complete(fs::path(argv[0]).parent_path());
 
@@ -23,13 +22,8 @@ std::optional<Args> ParseCommandLine(int argc, const char * const argv[]) {
     po::store(po::parse_command_line(argc, argv, desc), vm);
     po::notify(vm);
 
-    // Выводим описание параметров программы
-    //std::cout << desc;
-
     if (vm.contains("help"s)) {
-        // Если был указан параметр --help, то выводим справку и возвращаем nullopt
         std::cout << desc;
-        //return EXIT_SUCCESS;
         return std::nullopt;
     }
 
