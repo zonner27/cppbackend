@@ -1,4 +1,5 @@
 #include "request_handler.h"
+#include "api_request_handler.h"
 
 namespace http_handler {
 

@@ -7,6 +7,9 @@
 
 #include "json_loader/json_loader.h"
 #include "request_handler/request_handler.h"
+#include "request_handler/api_request_handler.h"
+#include "request_handler/logging_request_handler.h"
+#include "request_handler/static_request_handler.h"
 #include "files.h"
 #include "logger/logger.h"
 #include "app/players.h"

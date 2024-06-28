@@ -42,12 +42,19 @@ add_executable(game_server
         src/model/maps.h
         src/model/maps.cpp
 
+        src/request_handler/request_handler.cpp
+        src/request_handler/request_handler.h
+        src/request_handler/api_request_handler.cpp
+        src/request_handler/api_request_handler.h
+        src/request_handler/static_request_handler.cpp
+        src/request_handler/static_request_handler.h
+        src/request_handler/logging_request_handler.cpp
+        src/request_handler/logging_request_handler.h
+
 	src/tagged.h
         src/json_loader/boost_json.cpp
         src/json_loader/json_loader.h
-        src/json_loader/json_loader.cpp
-        src/request_handler/request_handler.cpp
-        src/request_handler/request_handler.h
+        src/json_loader/json_loader.cpp        
 	src/constants.h
         src/files.cpp
         src/files.h
