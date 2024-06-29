@@ -15,7 +15,7 @@ bool IsSubPath(fs::path path, fs::path base) {
     return true;
 }
 
-std::string url_decode(const std::string& url) {
+std::string UrlDecode(const std::string& url) {
     std::string result;
     result.reserve(url.size());
     for (size_t i = 0; i < url.size(); ++i) {
@@ -35,7 +35,7 @@ std::string url_decode(const std::string& url) {
     return result;
 }
 
-std::string mime_decode(fs::path& path) {
+std::string MimeDecode(fs::path& path) {
 
     std::string extension = path.extension().string();
     std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);

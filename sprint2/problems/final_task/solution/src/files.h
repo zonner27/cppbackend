@@ -13,7 +13,7 @@ using namespace std::literals;
 namespace files_path {
 
     bool IsSubPath(fs::path path, fs::path base);
-    std::string url_decode(const std::string& url);
-    std::string mime_decode(fs::path& path);
+    std::string UrlDecode(const std::string& url);
+    std::string MimeDecode(fs::path& path);
 
 }

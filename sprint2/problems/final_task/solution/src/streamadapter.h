@@ -18,7 +18,7 @@ public:
     }
 
     template <typename ConstBufferSequence>
-    size_t write_some(const ConstBufferSequence& cbs, sys::error_code& ec) {
+    size_t WriteSome(const ConstBufferSequence& cbs, sys::error_code& ec) {
         const size_t total_size = net::buffer_size(cbs);
         if (total_size == 0) {
             ec = {};
@@ -41,7 +41,7 @@ public:
     }
 
     template <typename ConstBufferSequence>
-    size_t write_some(const ConstBufferSequence& cbs) {
+    size_t WriteSome(const ConstBufferSequence& cbs) {
         sys::error_code ec;
         const size_t bytes_written = write_some(cbs, ec);
         if (ec) {

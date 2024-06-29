@@ -39,7 +39,7 @@ void RunWorkers(unsigned n, const Fn& fn) {
 
 int main(int argc, const char* argv[]) {
 
-    logger_init();
+    LoggerInit();
 
     try {
         auto args = ParseCommandLine(argc, argv);

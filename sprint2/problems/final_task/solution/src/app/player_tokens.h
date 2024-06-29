@@ -14,7 +14,7 @@ using Token = util::Tagged<std::string, detail::TokenTag>;
 class PlayerTokens {
 public:
     PlayerTokens() = default;
-    Token generateToken();
+    Token GenerateToken();
     Token AddPlayer(std::shared_ptr<Player> player);
     std::shared_ptr<Player> FindPlayerByToken(const Token& token);
     void PrintToken();

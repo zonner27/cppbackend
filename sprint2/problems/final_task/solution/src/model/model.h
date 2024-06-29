@@ -59,11 +59,11 @@ struct Offset {
 
 class Road {
     struct HorizontalTag {
-        explicit HorizontalTag() = default;
+        HorizontalTag() = default;
     };
 
     struct VerticalTag {
-        explicit VerticalTag() = default;
+        VerticalTag() = default;
     };
 
 public:
@@ -80,21 +80,10 @@ public:
         , end_{start.x, end_y} {
     }
 
-    bool IsHorizontal() const noexcept {
-        return start_.y == end_.y;
-    }
-
-    bool IsVertical() const noexcept {
-        return start_.x == end_.x;
-    }
-
-    Point GetStart() const noexcept {
-        return start_;
-    }
-
-    Point GetEnd() const noexcept {
-        return end_;
-    }
+    bool IsHorizontal() const noexcept;
+    bool IsVertical() const noexcept;
+    Point GetStart() const noexcept;
+    Point GetEnd() const noexcept;
 
 private:
     Point start_;
@@ -106,10 +95,7 @@ public:
     explicit Building(Rectangle bounds) noexcept
         : bounds_{bounds} {
     }
-
-    const Rectangle& GetBounds() const noexcept {
-        return bounds_;
-    }
+    const Rectangle& GetBounds() const noexcept;
 
 private:
     Rectangle bounds_;
@@ -125,17 +111,9 @@ public:
         , offset_{offset} {
     }
 
-    const Id& GetId() const noexcept {
-        return id_;
-    }
-
-    Point GetPosition() const noexcept {
-        return position_;
-    }
-
-    Offset GetOffset() const noexcept {
-        return offset_;
-    }
+    const Id& GetId() const noexcept;
+    Point GetPosition() const noexcept;
+    Offset GetOffset() const noexcept;
 
 private:
     Id id_;

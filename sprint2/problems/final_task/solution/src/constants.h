@@ -43,7 +43,7 @@ namespace constants {
 
     const uint32_t MAXPLAYERSINMAP = 20;
 
-    //const uint32_t MAXLENGTHFIELD = 100;
+    const double MAXDISTANCEFROMCENTER = 0.4;
 
     enum class Direction {
         NORTH,

@@ -39,7 +39,7 @@ protected:
 
 
     template <typename Send>
-    void sendJsonResponse(const json::value& jsonResponse, Send&& send) {
+    void SendJsonResponse(const json::value& jsonResponse, Send&& send) {
         StringResponse response;
         response.result(http::status::ok);
         response.set(http::field::content_type, "application/json");    
@@ -57,7 +57,7 @@ protected:
     }
 
     template <typename Send>
-    void sendErrorResponse(const std::string& code, const std::string& message, http::status status, Send&& send,
+    void SendErrorResponse(const std::string& code, const std::string& message, http::status status, Send&& send,
                            const std::string& allowMethods = "GET, HEAD, OPTIONS") {
         boost::json::object errorObject;
         errorObject["code"] = code;
@@ -83,7 +83,7 @@ protected:
     }
 
     template <typename Send>
-    void sendTextResponse(const std::string& text, http::status status, Send&& send) {
+    void SendTextResponse(const std::string& text, http::status status, Send&& send) {
         http::response<http::string_body> response;
         response.result(status);
         response.set(http::field::content_type, "text/plain");
@@ -93,12 +93,12 @@ protected:
     }
 
     template <typename Send>
-    void sendFileResponse(fs::path& file_path, Send&& send) {
-        std::string mime_types = files_path::mime_decode(file_path);
+    void SendFileResponse(fs::path& file_path, Send&& send) {
+        std::string mime_types = files_path::MimeDecode(file_path);
         http::file_body::value_type file;
 
         if (sys::error_code ec; file.open(file_path.string().c_str(), beast::file_mode::read, ec), ec) {
-            sendTextResponse("Failed to open file: " + ec.message(), http::status::internal_server_error, std::forward<Send>(send));
+            SendTextResponse("Failed to open file: " + ec.message(), http::status::internal_server_error, std::forward<Send>(send));
             return;
         }
 

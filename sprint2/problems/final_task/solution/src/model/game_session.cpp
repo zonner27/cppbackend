@@ -26,36 +26,36 @@ void GameSession::SetDogsCoordinatsByTime(int time_delta){
             if (const Road* road_cur = map_->GetHorRoad(start_x, start_y)) {
                 if (direction == constants::Direction::EAST) {
                     double road_x_end = static_cast<double>(road_cur->GetEnd().x);
-                    if (calc_finish.x - road_x_end <= 0.4) {
+                    if (calc_finish.x - road_x_end <= constants::MAXDISTANCEFROMCENTER) {
                         finish.x = calc_finish.x;
                     } else {
-                        finish.x = road_x_end + 0.4;
+                        finish.x = road_x_end + constants::MAXDISTANCEFROMCENTER;
                         dog->SetSpeed({0, 0});
                     }
                 }
                 if (direction == constants::Direction::WEST) {
                     double road_x_begin = static_cast<double>(road_cur->GetStart().x);
-                    if (road_x_begin - calc_finish.x <= 0.4) {
+                    if (road_x_begin - calc_finish.x <= constants::MAXDISTANCEFROMCENTER) {
                         finish.x = calc_finish.x;
                     } else {
-                        finish.x = road_x_begin - 0.4;
+                        finish.x = road_x_begin - constants::MAXDISTANCEFROMCENTER;
                         dog->SetSpeed({0, 0});
                     }
                 }
             } else {
                 if (direction == constants::Direction::EAST) {
-                    if (calc_finish.x - static_cast<double>(start_x) <= 0.4) {
+                    if (calc_finish.x - static_cast<double>(start_x) <= constants::MAXDISTANCEFROMCENTER) {
                         finish.x = calc_finish.x;
                     } else {
-                        finish.x = static_cast<double>(start_x) + 0.4;
+                        finish.x = static_cast<double>(start_x) + constants::MAXDISTANCEFROMCENTER;
                         dog->SetSpeed({0, 0});
                     }
                 }
                 if (direction == constants::Direction::WEST) {
-                    if (static_cast<double>(start_x) - calc_finish.x <= 0.4) {
+                    if (static_cast<double>(start_x) - calc_finish.x <= constants::MAXDISTANCEFROMCENTER) {
                         finish.x = calc_finish.x;
                     } else {
-                        finish.x = static_cast<double>(start_x) - 0.4;
+                        finish.x = static_cast<double>(start_x) - constants::MAXDISTANCEFROMCENTER;
                         dog->SetSpeed({0, 0});
                     }
                 }
@@ -65,36 +65,36 @@ void GameSession::SetDogsCoordinatsByTime(int time_delta){
             if (const Road* road_cur = map_->GetVerRoad(start_x, start_y)) {
                 if (direction == constants::Direction::SOUTH) {
                     double road_y_end = static_cast<double>(road_cur->GetEnd().y);
-                    if (calc_finish.y - road_y_end <= 0.4) {
+                    if (calc_finish.y - road_y_end <= constants::MAXDISTANCEFROMCENTER) {
                         finish.y = calc_finish.y;
                     } else {
-                        finish.y = road_y_end + 0.4;
+                        finish.y = road_y_end + constants::MAXDISTANCEFROMCENTER;
                         dog->SetSpeed({0, 0});
                     }
                 }
                 if (direction == constants::Direction::NORTH) {
                     double road_y_begin = static_cast<double>(road_cur->GetStart().y);
-                    if (road_y_begin - calc_finish.y <= 0.4) {
+                    if (road_y_begin - calc_finish.y <= constants::MAXDISTANCEFROMCENTER) {
                         finish.y = calc_finish.y;
                     } else {
-                        finish.y = road_y_begin - 0.4;
+                        finish.y = road_y_begin - constants::MAXDISTANCEFROMCENTER;
                         dog->SetSpeed({0, 0});
                     }
                 }
             } else {
                 if (direction == constants::Direction::SOUTH) {
-                    if (calc_finish.y - static_cast<double>(start_y) <= 0.4) {
+                    if (calc_finish.y - static_cast<double>(start_y) <= constants::MAXDISTANCEFROMCENTER) {
                         finish.y = calc_finish.y;
                     } else {
-                        finish.y = static_cast<double>(start_y) + 0.4;
+                        finish.y = static_cast<double>(start_y) + constants::MAXDISTANCEFROMCENTER;
                         dog->SetSpeed({0, 0});
                     }
                 }
                 if (direction == constants::Direction::NORTH) {
-                    if (static_cast<double>(start_y) - calc_finish.y <= 0.4) {
+                    if (static_cast<double>(start_y) - calc_finish.y <= constants::MAXDISTANCEFROMCENTER) {
                         finish.y = calc_finish.y;
                     } else {
-                        finish.y = static_cast<double>(start_y) - 0.4;
+                        finish.y = static_cast<double>(start_y) - constants::MAXDISTANCEFROMCENTER;
                         dog->SetSpeed({0, 0});
                     }
                 }

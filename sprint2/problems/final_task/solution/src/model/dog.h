@@ -6,15 +6,12 @@ namespace model {
 class Dog{
 public:
     Dog(std::string& name) : name_{name}, dog_id{nextId++} {}
-
     const std::string& GetName() const noexcept;
-
     const uint32_t GetId() const noexcept;
 
     const Coordinates& GetCoordinate() const noexcept;
     void SetCoordinate(const Coordinates& coordinates) noexcept;
     void SetCoordinateByPoint(const Point& point) noexcept;
-
     Coordinates GetCoordinateByTime(int time_delta) noexcept;
 
     const std::pair<double, double>& GetSpeed() const noexcept;

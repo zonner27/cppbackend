@@ -48,5 +48,11 @@ bool Application::GetRandomizeSpawnPoints() {
     return randomize_spawn_points_;
 }
 
+void Application::UpdateGameState(const std::chrono::milliseconds &time_delta) {
+    for (auto session : game_.GetAllSession()) {
+        session->SetDogsCoordinatsByTime(time_delta.count());
+    }
+}
+
 
 } //namespace app

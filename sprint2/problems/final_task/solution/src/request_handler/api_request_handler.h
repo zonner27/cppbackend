@@ -14,29 +14,28 @@ public:
     void operator()(http::request<Body, http::basic_fields<Allocator>>&& req, Send&& send) {
 
         if (req.target() == "/api/v1/maps" && req.method() == http::verb::get) {
-            handleGetMapsRequest(std::forward<Send>(send));
+            HandleGetMapsRequest(std::forward<Send>(send));
         } else if (req.method() == http::verb::get && req.target().starts_with("/api/v1/maps/")) {
-            handleGetMapByIdRequest(req.target().to_string().substr(13), std::forward<Send>(send));
+            HandleGetMapByIdRequest(req.target().to_string().substr(13), std::forward<Send>(send));
         } else if (req.target() == "/api/v1/game/players" ) {
-            handleGetPlayersRequest(req, std::forward<Send>(send));
+            HandleGetPlayersRequest(req, std::forward<Send>(send));
         } else if (req.target() == "/api/v1/game/join") {
-            handleJoinGameRequest(req, std::forward<Send>(send));
+            HandleJoinGameRequest(req, std::forward<Send>(send));
         } else if (req.target() == "/api/v1/game/state") {
-            handleGetState(req, std::forward<Send>(send));
+            HandleGetState(req, std::forward<Send>(send));
         } else if (req.target() == "/api/v1/game/player/action") {
-            handleSetPlayerAction(req, std::forward<Send>(send));
+            HandleSetPlayerAction(req, std::forward<Send>(send));
         } else if (req.target() == "/api/v1/game/tick") {
-            handleSetPlayersTick(req, std::forward<Send>(send));
+            HandleSetPlayersTick(req, std::forward<Send>(send));
         } else {
-            sendErrorResponse("badRequest", "Bad request", http::status::bad_request, std::forward<Send>(send));
+            SendErrorResponse("badRequest", "Bad request", http::status::bad_request, std::forward<Send>(send));
         }
-
     }
 
 private:
 
     template <typename Send>
-    void handleGetMapsRequest(Send&& send) {
+    void HandleGetMapsRequest(Send&& send) {
         json::array jsonArray;
 
         for (const auto& map : application_.GetGame().GetMaps()) {
@@ -45,33 +44,33 @@ private:
             mapObject["name"] = json::string(map.GetName());
             jsonArray.push_back(std::move(mapObject));
         }
-        sendJsonResponse(jsonArray, std::forward<Send>(send));
+        SendJsonResponse(jsonArray, std::forward<Send>(send));
     }
 
     template <typename Send>
-    void handleGetMapByIdRequest(const std::string& mapIdStr, Send&& send) {
+    void HandleGetMapByIdRequest(const std::string& mapIdStr, Send&& send) {
         model::Map::Id mapId = model::Map::Id(mapIdStr);
         const model::Map* map = application_.GetGame().FindMap(mapId);
 
         if (map != nullptr) {
-            json::object mapJson = createMapJson(*map);
-            sendJsonResponse(mapJson, std::forward<Send>(send));
+            json::object mapJson = CreateMapJson(*map);
+            SendJsonResponse(mapJson, std::forward<Send>(send));
         } else {
-            sendErrorResponse("mapNotFound", "Map not found", http::status::not_found, std::forward<Send>(send));
+            SendErrorResponse("mapNotFound", "Map not found", http::status::not_found, std::forward<Send>(send));
         }
     }
 
     template <typename Send>
-    void handleJoinGameRequest(const http::request<http::string_body>& req, Send&& send) {
+    void HandleJoinGameRequest(const http::request<http::string_body>& req, Send&& send) {
 
         if (req.method() != http::verb::post) {
             const std::string allowedMethods = "POST";
-            sendErrorResponse("invalidMethod", "Only POST method is expected", http::status::method_not_allowed, std::forward<Send>(send), allowedMethods);
+            SendErrorResponse("invalidMethod", "Only POST method is expected", http::status::method_not_allowed, std::forward<Send>(send), allowedMethods);
             return;
         }
 
         if (req[http::field::content_type] != "application/json") {
-            sendErrorResponse("invalidArgument", "Invalid Content-Type", http::status::bad_request, std::forward<Send>(send));
+            SendErrorResponse("invalidArgument", "Invalid Content-Type", http::status::bad_request, std::forward<Send>(send));
             return;
         }
 
@@ -84,17 +83,17 @@ private:
             const model::Map* map = application_.GetGame().FindMap(mapIdObj);
 
             if (userName.empty()) {
-                sendErrorResponse("invalidArgument", "Invalid name", http::status::bad_request, std::forward<Send>(send));
+                SendErrorResponse("invalidArgument", "Invalid name", http::status::bad_request, std::forward<Send>(send));
                 return;
             }
 
             if (!map) {
-                sendErrorResponse("mapNotFound", "Map not found", http::status::not_found, std::forward<Send>(send));
+                SendErrorResponse("mapNotFound", "Map not found", http::status::not_found, std::forward<Send>(send));
                 return;
             }
 
             if (application_.FindByDogNameAndMapId(userName, mapId) != nullptr) {
-                sendErrorResponse("invalidArgument", "User with the same dog name on same map exists", http::status::bad_request, std::forward<Send>(send));
+                SendErrorResponse("invalidArgument", "User with the same dog name on same map exists", http::status::bad_request, std::forward<Send>(send));
                 return;
             }
 
@@ -109,19 +108,19 @@ private:
                 };
             });
 
-            sendJsonResponse(responseBody, std::forward<Send>(send));
+            SendJsonResponse(responseBody, std::forward<Send>(send));
 
         } catch (const std::exception& e) {
-            sendErrorResponse("invalidArgument", "Join game request parse error", http::status::bad_request, std::forward<Send>(send));
+            SendErrorResponse("invalidArgument", "Join game request parse error", http::status::bad_request, std::forward<Send>(send));
         }
     }
 
     template <typename Send>
-    void handleGetPlayersRequest(const http::request<http::string_body>& req, Send&& send) {
+    void HandleGetPlayersRequest(const http::request<http::string_body>& req, Send&& send) {
 
         if (req.method() != http::verb::get && req.method() != http::verb::head) {
             const std::string allowedMethods = "GET, HEAD";
-            sendErrorResponse("invalidMethod", "Only POST method is expected", http::status::method_not_allowed, std::forward<Send>(send), allowedMethods);
+            SendErrorResponse("invalidMethod", "Only POST method is expected", http::status::method_not_allowed, std::forward<Send>(send), allowedMethods);
             return;
         }
 
@@ -137,21 +136,21 @@ private:
                 response_json[std::to_string(dog->GetId())] = dog_json;
             }
 
-            sendJsonResponse(response_json, std::forward<Send>(send));
+            SendJsonResponse(response_json, std::forward<Send>(send));
         });
     }
 
     template <typename Send>
-    void handleSetPlayerAction(const http::request<http::string_body>& req, Send&& send) {
+    void HandleSetPlayerAction(const http::request<http::string_body>& req, Send&& send) {
 
         if (req.method() != http::verb::post) {
             const std::string allowedMethods = "POST";
-            sendErrorResponse("invalidMethod", "Only POST method is expected", http::status::method_not_allowed, std::forward<Send>(send), allowedMethods);
+            SendErrorResponse("invalidMethod", "Only POST method is expected", http::status::method_not_allowed, std::forward<Send>(send), allowedMethods);
             return;
         }
 
         if (req[http::field::content_type] != "application/json") {
-            sendErrorResponse("invalidArgument", "Invalid Content-Type", http::status::bad_request, std::forward<Send>(send));
+            SendErrorResponse("invalidArgument", "Invalid Content-Type", http::status::bad_request, std::forward<Send>(send));
             return;
         }
 
@@ -162,7 +161,7 @@ private:
                 json::object obj = parsedJson.as_object();
 
                 if (!obj.contains("move") || !obj["move"].is_string()) {
-                    sendErrorResponse("invalidArgument", "Failed to parse action", http::status::bad_request, std::forward<Send>(send));
+                    SendErrorResponse("invalidArgument", "Failed to parse action", http::status::bad_request, std::forward<Send>(send));
                     return;
                 }
 
@@ -190,26 +189,26 @@ private:
                     } else if (move == "") {
                         dog->SetSpeed({0, 0});
                     } else {
-                        self->sendErrorResponse("invalidArgument", "Invalid move value", http::status::bad_request, std::forward<Send>(send));
+                        self->SendErrorResponse("invalidArgument", "Invalid move value", http::status::bad_request, std::forward<Send>(send));
                         return;
                     }
 
                 });
 
-                sendJsonResponse("{}", std::forward<Send>(send));
+                SendJsonResponse("{}", std::forward<Send>(send));
 
                 } catch (const std::exception& e) {
-                    sendErrorResponse("invalidArgument", "Failed to parse action", http::status::bad_request, std::forward<Send>(send));
+                    SendErrorResponse("invalidArgument", "Failed to parse action", http::status::bad_request, std::forward<Send>(send));
                 }
         });
     }
 
     template <typename Send>
-    void handleGetState(const http::request<http::string_body>& req, Send&& send) {
+    void HandleGetState(const http::request<http::string_body>& req, Send&& send) {
 
         if (req.method() != http::verb::get && req.method() != http::verb::head) {
             const std::string allowedMethods = "GET, HEAD";
-            sendErrorResponse("invalidMethod", "Only POST method is expected", http::status::method_not_allowed, std::forward<Send>(send), allowedMethods);
+            SendErrorResponse("invalidMethod", "Only POST method is expected", http::status::method_not_allowed, std::forward<Send>(send), allowedMethods);
             return;
         }
 
@@ -248,21 +247,21 @@ private:
 
             response_json["players"] = players_json;
 
-            sendJsonResponse(response_json, std::forward<Send>(send));
+            SendJsonResponse(response_json, std::forward<Send>(send));
         });
     }
 
     template <typename Send>
-    void handleSetPlayersTick(const http::request<http::string_body>& req, Send&& send) {
+    void HandleSetPlayersTick(const http::request<http::string_body>& req, Send&& send) {
 
         if (req.method() != http::verb::post) {
             const std::string allowedMethods = "POST";
-            sendErrorResponse("invalidMethod", "Only POST method is expected", http::status::method_not_allowed, std::forward<Send>(send), allowedMethods);
+            SendErrorResponse("invalidMethod", "Only POST method is expected", http::status::method_not_allowed, std::forward<Send>(send), allowedMethods);
             return;
         }
 
         if (req[http::field::content_type] != "application/json") {
-            sendErrorResponse("invalidArgument", "Invalid Content-Type", http::status::bad_request, std::forward<Send>(send));
+            SendErrorResponse("invalidArgument", "Invalid Content-Type", http::status::bad_request, std::forward<Send>(send));
             return;
         }
 
@@ -272,7 +271,7 @@ private:
             json::object obj = parsedJson.as_object();
 
             if (!obj.contains("timeDelta") || !obj["timeDelta"].is_int64()) {
-                sendErrorResponse("invalidArgument", "Failed to parse action", http::status::bad_request, std::forward<Send>(send));
+                SendErrorResponse("invalidArgument", "Failed to parse action", http::status::bad_request, std::forward<Send>(send));
                 return;
             }
 
@@ -284,10 +283,10 @@ private:
             });
 
         } catch (const std::exception& e) {
-            sendErrorResponse("invalidArgument", "Failed to parse action", http::status::bad_request, std::forward<Send>(send));
+            SendErrorResponse("invalidArgument", "Failed to parse action", http::status::bad_request, std::forward<Send>(send));
         }
         json::object response_json = {};
-        sendJsonResponse(response_json, std::forward<Send>(send));
+        SendJsonResponse(response_json, std::forward<Send>(send));
     }
 
     template <typename Fn, typename Send>
@@ -296,7 +295,7 @@ private:
         auto authHeader = req.find(http::field::authorization);
 
         if (authHeader == req.end()) {
-            sendErrorResponse("invalidToken", "Authorization header is required", http::status::unauthorized, std::forward<Send>(send));
+            SendErrorResponse("invalidToken", "Authorization header is required", http::status::unauthorized, std::forward<Send>(send));
             return;
         }
 
@@ -305,26 +304,29 @@ private:
         if (tokenStr.rfind(bearerPrefix, 0) == 0) {
             tokenStr = tokenStr.substr(bearerPrefix.size());
         } else {
-            sendErrorResponse("invalidToken", "Invalid token format", http::status::unauthorized, std::forward<Send>(send));
+            SendErrorResponse("invalidToken", "Invalid token format", http::status::unauthorized, std::forward<Send>(send));
             return;
         }
 
         if (tokenStr.size() != 32) {
-            sendErrorResponse("invalidToken", "Invalid token format", http::status::unauthorized, std::forward<Send>(send));
+            SendErrorResponse("invalidToken", "Invalid token format", http::status::unauthorized, std::forward<Send>(send));
             return;
         }
 
         app::Token token(tokenStr);
         auto player = application_.GetPlayerTokens().FindPlayerByToken(token);
         if (!player) {
-            sendErrorResponse("unknownToken", "Player token has not been found", http::status::unauthorized, std::forward<Send>(send));
+            SendErrorResponse("unknownToken", "Player token has not been found", http::status::unauthorized, std::forward<Send>(send));
             return;
         }
 
         action(token);
     }
 
-    json::object createMapJson(const model::Map& map);
+    json::object CreateMapJson(const model::Map& map);
+    json::object SerializeRoad(const model::Road& road);
+    json::object SerializeBuilding(const model::Building& building);
+    json::object SerializeOffice(const model::Office& office);
 };
 
 } //namespace http_handler

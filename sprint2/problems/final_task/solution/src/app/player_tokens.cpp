@@ -2,7 +2,7 @@
 
 namespace app {
 
-Token app::PlayerTokens::generateToken() {
+Token app::PlayerTokens::GenerateToken() {
     auto random_number1 = generator1_();
     auto random_number2 = generator2_();
 
@@ -14,7 +14,7 @@ Token app::PlayerTokens::generateToken() {
 }
 
 Token PlayerTokens::AddPlayer(std::shared_ptr<Player> player) {
-    Token token = generateToken();
+    Token token = GenerateToken();
     token_to_player_[token] = player;
     return token;
 }

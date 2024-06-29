@@ -9,7 +9,6 @@
 
 using namespace std::literals;
 
-
 struct Args {
     uint32_t tick_period{0};
     std::string config_file;

@@ -51,11 +51,7 @@ public:
     std::chrono::milliseconds GetTickPeriod();
     bool GetRandomizeSpawnPoints();
 
-    void UpdateGameState(const std::chrono::milliseconds& time_delta) {
-        for (auto session : game_.GetAllSession()) {
-            session->SetDogsCoordinatsByTime(time_delta.count());
-        }
-    }
+    void UpdateGameState(const std::chrono::milliseconds& time_delta);
 
 private:
     model::Game game_;

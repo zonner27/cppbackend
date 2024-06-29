@@ -22,7 +22,7 @@ namespace expressions = boost::log::expressions;
 BOOST_LOG_ATTRIBUTE_KEYWORD(additional_data, "AdditionalData", json::value)
 BOOST_LOG_ATTRIBUTE_KEYWORD(timestamp, "TimeStamp", boost::log::attributes::local_clock::value_type)
 
-void json_formatter(logging::record_view const& rec, logging::formatting_ostream& strm);
+void JsonFormatter(logging::record_view const& rec, logging::formatting_ostream& strm);
 
-void logger_init();
+void LoggerInit();
 

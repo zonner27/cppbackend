@@ -1,6 +1,5 @@
 #include "program_options.h"
 
-
 std::optional<Args> ParseCommandLine(int argc, const char * const argv[]) {
     namespace po = boost::program_options;
     namespace fs = boost::filesystem;
@@ -35,7 +34,6 @@ std::optional<Args> ParseCommandLine(int argc, const char * const argv[]) {
         throw std::runtime_error("static files root is not specified"s);
     }
 
-    // С опциями программы всё в порядке, возвращаем структуру args
     return args;
 
 }

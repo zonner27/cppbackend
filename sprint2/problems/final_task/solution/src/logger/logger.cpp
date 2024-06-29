@@ -1,6 +1,6 @@
 #include "logger.h"
 
-void json_formatter(logging::record_view const& rec, logging::formatting_ostream& strm) {
+void JsonFormatter(logging::record_view const& rec, logging::formatting_ostream& strm) {
 
     json::object data_strm;
 
@@ -17,13 +17,13 @@ void json_formatter(logging::record_view const& rec, logging::formatting_ostream
     strm << json::serialize(data_strm);
 }
 
-void logger_init()
+void LoggerInit()
 {
     logging::add_common_attributes();
 
     logging::add_console_log(
-        std::cout,  //std::clog
-        keywords::format = &json_formatter,
+        std::cout,
+        keywords::format = &JsonFormatter,
         keywords::auto_flush = true
     );
 }
