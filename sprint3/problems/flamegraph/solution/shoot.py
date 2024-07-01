@@ -18,8 +18,6 @@ AMMUNITION = [
 SHOOT_COUNT = 100
 COOLDOWN = 0.1
 
-FLAMEGRAPH_DIR = './FlameGraph/'
-
 def start_server():
     parser = argparse.ArgumentParser()
     parser.add_argument('server', type=str)
@@ -68,11 +66,9 @@ time.sleep(0.5)
 stop(server)
 time.sleep(1)
 
-if os.path.exists('perf.data') and os.path.getsize('perf.data') > 0:
-    flamegraph_command = f"perf script | {FLAMEGRAPH_DIR}/stackcollapse-perf.pl | {FLAMEGRAPH_DIR}/flamegraph.pl > graph.svg"
-    subprocess.run(flamegraph_command, shell=True, check=True)
-    print("Flamegraph created successfully: graph.svg")
-else:
-    print("No data in perf.data or file does not exist")
+flamegraph_command = f"perf script -i perf.data | ./FlameGraph/stackcollapse-perf.pl | ./FlameGraph/flamegraph.pl > graph.svg"
+subprocess.run(flamegraph_command, shell=True, check=True)
 
 print('Job done')
+
+
