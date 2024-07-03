@@ -54,4 +54,12 @@ const double Game::GetDefaultDogSpeed() {
     return defaultDogSpeed_;
 }
 
+void Game::SetLootGeneratorConfig(LootGeneratorConfig &lood_gen_config) {
+    lood_gen_config_ = lood_gen_config;
+}
+
+LootGeneratorConfig &Game::GetLootGeneratorConfig() {
+    return lood_gen_config_;
+}
+
 } // namespace model

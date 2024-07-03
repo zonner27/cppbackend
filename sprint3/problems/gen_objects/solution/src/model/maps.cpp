@@ -22,6 +22,10 @@ const Map::Offices &Map::GetOffices() const noexcept {
     return offices_;
 }
 
+const Map::LootTypes &Map::GetLootType() const noexcept {
+    return loot_types_;
+}
+
 void Map::AddRoad(const Road &road) {
     roads_.push_back(road);
     if (start_roads_point_.x == -1) {
@@ -86,6 +90,10 @@ void Map::AddOffice(Office office) {
         offices_.pop_back();
         throw;
     }
+}
+
+void Map::AddLootType(const LootType &loot_type) {
+    loot_types_.emplace_back(loot_type);
 }
 
 void Map::SetDogSpeed(double dogSpeed) {

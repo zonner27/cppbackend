@@ -26,6 +26,12 @@ json::object ApiRequestHandler::CreateMapJson(const model::Map& map) {
     }
     mapJson[constants::OFFICES] = std::move(officesJsonArray);
 
+    json::array loot_typeJsonArray;
+    for (const auto& loot_type : map.GetLootType()) {
+        loot_typeJsonArray.push_back(std::move(SerializeLootType(loot_type)));
+    }
+    mapJson[constants::LOOT_TYPES] = std::move(loot_typeJsonArray);
+
     return mapJson;
 }
 
@@ -61,6 +67,17 @@ json::object ApiRequestHandler::SerializeOffice(const model::Office &office) {
     officeJson[constants::OFFSET_X] = office.GetOffset().dx;
     officeJson[constants::OFFSET_Y] = office.GetOffset().dy;
     return officeJson;
+}
+
+json::object ApiRequestHandler::SerializeLootType(const model::LootType &loot_type) {
+    json::object lootJson;
+    lootJson[constants::NAME] = loot_type.name;
+    lootJson[constants::FILE] = loot_type.file;
+    lootJson[constants::TYPE] = loot_type.type;
+    lootJson[constants::ROTATION] = loot_type.rotation;
+    lootJson[constants::COLOR] = loot_type.color;
+    lootJson[constants::SCALE] = loot_type.scale;
+    return lootJson;
 }
 
 } //namespace http_handler

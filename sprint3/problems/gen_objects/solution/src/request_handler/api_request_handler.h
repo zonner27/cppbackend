@@ -327,6 +327,7 @@ private:
     json::object SerializeRoad(const model::Road& road);
     json::object SerializeBuilding(const model::Building& building);
     json::object SerializeOffice(const model::Office& office);
+    json::object SerializeLootType(const model::LootType &loot_type);
 };
 
 } //namespace http_handler

@@ -29,6 +29,16 @@ model::Game LoadGame(const std::filesystem::path& json_path) {
        game.SetDefaultDogSpeed(jsonData.as_object().at("defaultDogSpeed").as_double());
     }
 
+    if (jsonData.as_object().contains("lootGeneratorConfig")) {
+        const auto& loot_gen_config_json = jsonData.at("lootGeneratorConfig").as_object();
+
+        model::LootGeneratorConfig loot_gen_config;
+        loot_gen_config.period = loot_gen_config_json.at("period").as_double();
+        loot_gen_config.probability = loot_gen_config_json.at("probability").as_double();
+
+        game.SetLootGeneratorConfig(loot_gen_config);
+    }
+
     const auto& mapsArray = jsonData.as_object()[constants::MAPS].as_array();
     for (const auto& mapData : mapsArray) {
         std::string mapId = mapData.as_object().at(constants::ID).as_string().c_str();
@@ -45,6 +55,7 @@ model::Game LoadGame(const std::filesystem::path& json_path) {
             ParseRoads(mapData, map);
             ParseBuildings(mapData, map);
             ParseOffices(mapData, map);
+            ParseLootTypes(mapData, map);
         } catch (const std::exception& e) {
             throw std::runtime_error("Error while parsing map data in map: " + mapId + ": " + std::string(e.what()));
         }
@@ -97,6 +108,36 @@ void ParseOffices(const json::value& mapData, model::Map& map) {
         int offsetY = officeData.as_object().at(constants::OFFSET_Y).as_int64();
 
         map.AddOffice(model::Office(officeId, {x, y}, {offsetX, offsetY}));
+    }
+}
+
+void ParseLootTypes(const boost::json::value &mapData, model::Map &map) {
+
+    const auto& lootTypesArray = mapData.as_object().at(constants::LOOT_TYPES).as_array();
+
+    for (const auto& lootTypeData : lootTypesArray) {
+        model::LootType lootType;
+
+        if (lootTypeData.as_object().contains(constants::NAME)) {
+            lootType.name = lootTypeData.as_object().at(constants::NAME).as_string().c_str();
+        }
+        if (lootTypeData.as_object().contains(constants::FILE)) {
+            lootType.file = lootTypeData.as_object().at(constants::FILE).as_string().c_str();
+        }
+        if (lootTypeData.as_object().contains(constants::TYPE)) {
+            lootType.type = lootTypeData.as_object().at(constants::TYPE).as_string().c_str();
+        }
+        if (lootTypeData.as_object().contains(constants::ROTATION)) {
+            lootType.rotation = lootTypeData.as_object().at(constants::ROTATION).as_int64();
+        }
+        if (lootTypeData.as_object().contains(constants::COLOR)) {
+            lootType.color = lootTypeData.as_object().at(constants::COLOR).as_string().c_str();
+        }
+        if (lootTypeData.as_object().contains(constants::SCALE)) {
+            lootType.scale = lootTypeData.as_object().at(constants::SCALE).as_double();
+        }
+
+        map.AddLootType(lootType);
     }
 }
 

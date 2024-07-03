@@ -26,7 +26,13 @@ namespace constants {
     const std::string BUILDINGS = "buildings";
     const std::string OFFICES = "offices";
     const std::string CODE = "code";
-    const std::string MESSAGE = "message";
+    const std::string MESSAGE = "message";    
+    const std::string LOOT_TYPES =  "lootTypes";
+    const std::string FILE = "file";
+    const std::string TYPE = "type";
+    const std::string ROTATION = "rotaton";
+    const std::string COLOR = "color";
+    const std::string SCALE = "scale";
 
     const std::unordered_map<std::string, std::string> MIME_TYPES = {
         {".htm", "text/html"}, {".html", "text/html"},

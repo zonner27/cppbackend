@@ -27,6 +27,10 @@ public:
     void SetDefaultDogSpeed(double defaultDogSpeed);
     const double GetDefaultDogSpeed();
 
+    void SetLootGeneratorConfig(LootGeneratorConfig& lood_gen_config);
+    LootGeneratorConfig& GetLootGeneratorConfig();
+
+
 private:
     using MapIdHasher = util::TaggedHasher<Map::Id>;
     using MapIdToIndex = std::unordered_map<Map::Id, size_t, MapIdHasher>;
@@ -36,6 +40,8 @@ private:
 
     std::vector<std::shared_ptr<GameSession>> sessions_;
     double defaultDogSpeed_ = 1;
+
+    LootGeneratorConfig lood_gen_config_;
 };
 
 

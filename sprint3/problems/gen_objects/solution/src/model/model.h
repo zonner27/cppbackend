@@ -37,7 +37,6 @@ struct Point {
     }
 };
 
-
 struct Coordinates {
     double x;
     double y;
@@ -121,6 +120,19 @@ private:
     Offset offset_;
 };
 
+struct LootGeneratorConfig {
+    double period;
+    double probability;
+};
+
+struct LootType {
+    std::string name{""};
+    std::string file{""};
+    std::string type{""};
+    int rotation{0};
+    std::string color{""};
+    double scale{0.0};
+};
 
 
 }  // namespace model

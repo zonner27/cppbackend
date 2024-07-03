@@ -11,6 +11,7 @@ public:
     using RoadMap = std::map<int, Roads>;
     using Buildings = std::vector<Building>;
     using Offices = std::vector<Office>;
+    using LootTypes = std::vector<LootType>;
 
     Map(Id id, std::string name) noexcept
         : id_(std::move(id))
@@ -22,12 +23,14 @@ public:
     const Buildings& GetBuildings() const noexcept;
     const Roads& GetRoads() const noexcept;
     const Offices& GetOffices() const noexcept;
+    const LootTypes& GetLootType() const noexcept;
     void AddRoad(const Road& road);
     const Road* GetHorRoad(Coord x, Coord y) const;
     const Road* GetVerRoad(Coord x, Coord y) const;
 
     void AddBuilding(const Building& building);
-    void AddOffice(Office office);
+    void AddOffice(Office office);    
+    void AddLootType(const LootType& loot_type);
 
     void SetDogSpeed(double dogSpeed);
     const double GetDogSpeed() const noexcept;
@@ -49,6 +52,7 @@ private:
     RoadMap hor_roads_;
     RoadMap ver_roads_;
     Buildings buildings_;
+    LootTypes loot_types_;
     double dogSpeed_;
 
 

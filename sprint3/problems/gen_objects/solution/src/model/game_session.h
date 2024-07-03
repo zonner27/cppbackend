@@ -3,6 +3,7 @@
 #include "model.h"
 #include "dog.h"
 #include "maps.h"
+#include "loot_generator.h"
 #include <cmath>
 
 namespace model {
@@ -24,6 +25,7 @@ public:
 
 private:
     std::unordered_set<std::shared_ptr<Dog>> dogs_;
+    //loot_gen::LootGenerator loot_generator_;
     const Map* map_;
 };
 
