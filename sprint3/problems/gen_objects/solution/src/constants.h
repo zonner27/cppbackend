@@ -26,11 +26,12 @@ namespace constants {
     const std::string BUILDINGS = "buildings";
     const std::string OFFICES = "offices";
     const std::string CODE = "code";
-    const std::string MESSAGE = "message";    
+    const std::string MESSAGE = "message";
+
     const std::string LOOT_TYPES =  "lootTypes";
     const std::string FILE = "file";
     const std::string TYPE = "type";
-    const std::string ROTATION = "rotaton";
+    const std::string ROTATION = "rotation";
     const std::string COLOR = "color";
     const std::string SCALE = "scale";
 

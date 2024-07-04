@@ -129,9 +129,9 @@ struct LootType {
     std::string name{""};
     std::string file{""};
     std::string type{""};
-    int rotation{0};
+    int rotation{std::numeric_limits<int>::min()};
     std::string color{""};
-    double scale{0.0};
+    double scale{std::numeric_limits<double>::quiet_NaN()};
 };
 
 

@@ -13,10 +13,10 @@ public:
     template <typename Body, typename Allocator, typename Send>
     void operator()(http::request<Body, http::basic_fields<Allocator>>&& req, Send&& send) {
 
-        if (req.target() == "/api/v1/maps" && req.method() == http::verb::get) {
-            HandleGetMapsRequest(std::forward<Send>(send));
-        } else if (req.method() == http::verb::get && req.target().starts_with("/api/v1/maps/")) {
-            HandleGetMapByIdRequest(req.target().to_string().substr(13), std::forward<Send>(send));
+        if (req.target() == "/api/v1/maps") {
+            HandleGetMapsRequest(req, std::forward<Send>(send));
+        } else if (req.target().starts_with("/api/v1/maps/")) {
+            HandleGetMapByIdRequest(req, std::forward<Send>(send));
         } else if (req.target() == "/api/v1/game/players" ) {
             HandleGetPlayersRequest(req, std::forward<Send>(send));
         } else if (req.target() == "/api/v1/game/join") {
@@ -35,7 +35,13 @@ public:
 private:
 
     template <typename Send>
-    void HandleGetMapsRequest(Send&& send) {
+    void HandleGetMapsRequest(const http::request<http::string_body>& req, Send&& send) {
+        if (req.method() != http::verb::get && req.method() != http::verb::head) {
+            const std::string allowedMethods = "GET, HEAD";
+            SendErrorResponse("invalidMethod", "Only POST method is expected", http::status::method_not_allowed, std::forward<Send>(send), allowedMethods);
+            return;
+        }
+
         json::array jsonArray;
 
         for (const auto& map : application_.GetGame().GetMaps()) {
@@ -48,14 +54,15 @@ private:
     }
 
     template <typename Send>
-    void HandleGetMapByIdRequest(const std::string& mapIdStr, Send&& send) {
+    void HandleGetMapByIdRequest(const http::request<http::string_body>& req, Send&& send) {
 
-//        if (req.method() != http::verb::get && req.method() != http::verb::head) {
-//            const std::string allowedMethods = "GET, HEAD";
-//            SendErrorResponse("invalidMethod", "Only POST method is expected", http::status::method_not_allowed, std::forward<Send>(send), allowedMethods);
-//            return;
-//        }
+        if (req.method() != http::verb::get && req.method() != http::verb::head) {
+            const std::string allowedMethods = "GET, HEAD";
+            SendErrorResponse("invalidMethod", "Only POST method is expected", http::status::method_not_allowed, std::forward<Send>(send), allowedMethods);
+            return;
+        }
 
+        std::string mapIdStr = req.target().to_string().substr(13);
         model::Map::Id mapId = model::Map::Id(mapIdStr);
         const model::Map* map = application_.GetGame().FindMap(mapId);
 

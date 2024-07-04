@@ -71,12 +71,24 @@ json::object ApiRequestHandler::SerializeOffice(const model::Office &office) {
 
 json::object ApiRequestHandler::SerializeLootType(const model::LootType &loot_type) {
     json::object lootJson;
-    lootJson[constants::NAME] = loot_type.name;
-    lootJson[constants::FILE] = loot_type.file;
-    lootJson[constants::TYPE] = loot_type.type;
-    lootJson[constants::ROTATION] = loot_type.rotation;
-    lootJson[constants::COLOR] = loot_type.color;
-    lootJson[constants::SCALE] = loot_type.scale;
+    if (!loot_type.name.empty()) {
+        lootJson[constants::NAME] = loot_type.name;
+    }
+    if (!loot_type.file.empty()) {
+        lootJson[constants::FILE] = loot_type.file;
+    }
+    if (!loot_type.type.empty()) {
+        lootJson[constants::TYPE] = loot_type.type;
+    }
+    if (loot_type.rotation != std::numeric_limits<int>::min()) {
+        lootJson[constants::ROTATION] = loot_type.rotation;
+    }
+    if (!loot_type.color.empty()) {
+        lootJson[constants::COLOR] = loot_type.color;
+    }
+    if (!std::isnan(loot_type.scale)) {
+        lootJson[constants::SCALE] = loot_type.scale;
+    }
     return lootJson;
 }
 
