@@ -15,7 +15,6 @@ public:
 
     using Id = util::Tagged<std::string, Map>;
 
-    //GameSession(const Map* map) : map_{map} {}
     GameSession(const Map* map,
                 loot_gen::LootGenerator::TimeInterval time_update,
                 LootGeneratorConfig loot_gen_config)
@@ -51,17 +50,12 @@ public:
         unsigned looter_count = dogs_.size();
 
         unsigned new_loot_count = loot_generator_.Generate(time_delta, loot_count, looter_count);
-        //std::cout << "new_loot_count = " << new_loot_count << std::endl;
 
         for (unsigned i = 0; i < new_loot_count; ++i) {
             auto lost_object = std::make_shared<LostObject>();
             lost_object->SetCoordinateByPoint(map_->GetRandomPointRoadMap());
             lost_object->SetType(GetRandomTypeLostObject());
             lost_objects_.insert(lost_object);
-//            std::cout << " id = " << lost_object->GetId()
-//                      << " type = " << lost_object->GetType()
-//                      << " x = " << lost_object->GetCoordinate().x
-//                      << " y = " << lost_object->GetCoordinate().y << std::endl;
         }
     }
 
