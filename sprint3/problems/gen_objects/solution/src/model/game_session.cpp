@@ -12,7 +12,8 @@ void GameSession::AddDog(std::shared_ptr<Dog> dog, bool randomize_spawn_points) 
     dogs_.insert(dog);
 }
 
-void GameSession::SetDogsCoordinatsByTime(int time_delta){
+void GameSession::UpdateDogsCoordinatsByTime(std::chrono::milliseconds time_delta_ms){
+    int time_delta = static_cast<int>(time_delta_ms.count());
     for (auto& dog : dogs_) {
         Coordinates start = dog->GetCoordinate();
         Dimension start_x = static_cast<Dimension>(std::round(start.x));
@@ -118,6 +119,10 @@ const size_t GameSession::GetDogsCount() const noexcept {
 
 std::unordered_set<std::shared_ptr<Dog> > &GameSession::GetDogs() noexcept {
     return dogs_;
+}
+
+std::unordered_set<std::shared_ptr<LostObject> > &GameSession::GetLostObject() noexcept {
+    return lost_objects_;
 }
 
 const GameSession::Id &GameSession::GetId() const noexcept {

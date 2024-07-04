@@ -43,6 +43,8 @@ add_executable(game_server
         src/model/maps.cpp
         src/model/loot_generator.h
         src/model/loot_generator.cpp
+        src/model/lost_object.h
+        src/model/lost_object.cpp
 
         src/request_handler/request_handler.h
         src/request_handler/api_request_handler.cpp
@@ -70,15 +72,15 @@ add_executable(game_server
 
 )
 target_include_directories(game_server PRIVATE CONAN_PKG::boost)
-target_link_libraries(game_server 			
-                            CONAN_PKG::boost
-                            Threads::Threads)
+target_link_libraries(game_server CONAN_PKG::boost Threads::Threads)
 
-add_executable(catch_tests
+add_executable(game_server_tests
     tests/loot_generator_tests.cpp
     src/model/loot_generator.h
     src/model/loot_generator.cpp
 )
-target_link_libraries(catch_tests PRIVATE CONAN_PKG::catch2)
+target_include_directories(game_server_tests PRIVATE  CONAN_PKG::boost)
+target_link_libraries(game_server_tests PRIVATE CONAN_PKG::catch2
+                                CONAN_PKG::boost Threads::Threads)
 
 

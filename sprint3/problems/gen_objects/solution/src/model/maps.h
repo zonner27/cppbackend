@@ -23,7 +23,7 @@ public:
     const Buildings& GetBuildings() const noexcept;
     const Roads& GetRoads() const noexcept;
     const Offices& GetOffices() const noexcept;
-    const LootTypes& GetLootType() const noexcept;
+    const LootTypes& GetLootTypes() const noexcept;
     void AddRoad(const Road& road);
     const Road* GetHorRoad(Coord x, Coord y) const;
     const Road* GetVerRoad(Coord x, Coord y) const;

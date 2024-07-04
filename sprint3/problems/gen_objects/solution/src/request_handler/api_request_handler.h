@@ -49,6 +49,13 @@ private:
 
     template <typename Send>
     void HandleGetMapByIdRequest(const std::string& mapIdStr, Send&& send) {
+
+//        if (req.method() != http::verb::get && req.method() != http::verb::head) {
+//            const std::string allowedMethods = "GET, HEAD";
+//            SendErrorResponse("invalidMethod", "Only POST method is expected", http::status::method_not_allowed, std::forward<Send>(send), allowedMethods);
+//            return;
+//        }
+
         model::Map::Id mapId = model::Map::Id(mapIdStr);
         const model::Map* map = application_.GetGame().FindMap(mapId);
 
@@ -217,6 +224,8 @@ private:
             json::object response_json;
 
             boost::json::object players_json;
+            boost::json::object lost_objects_json;
+
             std::vector<std::shared_ptr<model::GameSession>> sessions = application_.GetGame().GetAllSession(); //self->
             for (std::shared_ptr<model::GameSession>& session : sessions) {
                 for (const std::shared_ptr<model::Dog>& dog : session->GetDogs()) {
@@ -243,9 +252,17 @@ private:
                     }
                     players_json[std::to_string(dog->GetId())] = dog_json;
                 }
+                for (const std::shared_ptr<model::LostObject>& lost_object: session->GetLostObject()) {
+                    boost::json::object lost_object_json;
+                    lost_object_json["type"] = lost_object->GetType();
+                    lost_object_json["pos"] = {lost_object->GetCoordinate().x, lost_object->GetCoordinate().y};
+
+                    lost_objects_json[std::to_string(lost_object->GetId())] = lost_object_json;
+                }
             }
 
             response_json["players"] = players_json;
+            response_json["lostObjects"] = lost_objects_json;
 
             SendJsonResponse(response_json, std::forward<Send>(send));
         });

@@ -27,7 +27,7 @@ json::object ApiRequestHandler::CreateMapJson(const model::Map& map) {
     mapJson[constants::OFFICES] = std::move(officesJsonArray);
 
     json::array loot_typeJsonArray;
-    for (const auto& loot_type : map.GetLootType()) {
+    for (const auto& loot_type : map.GetLootTypes()) {
         loot_typeJsonArray.push_back(std::move(SerializeLootType(loot_type)));
     }
     mapJson[constants::LOOT_TYPES] = std::move(loot_typeJsonArray);

@@ -22,7 +22,7 @@ const Map::Offices &Map::GetOffices() const noexcept {
     return offices_;
 }
 
-const Map::LootTypes &Map::GetLootType() const noexcept {
+const Map::LootTypes &Map::GetLootTypes() const noexcept {
     return loot_types_;
 }
 

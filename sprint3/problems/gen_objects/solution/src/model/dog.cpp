@@ -32,9 +32,9 @@ Coordinates Dog::GetCoordinateByTime(int time_delta) noexcept {
     return finish;
 }
 
-const std::pair<double, double> &Dog::GetSpeed() const noexcept {;
+const std::pair<double, double> &Dog::GetSpeed() const noexcept {
     return speed_;
-                                                                }
+}
 
 void Dog::SetSpeed(const std::pair<double, double> &speed) noexcept {
     speed_ = speed;
