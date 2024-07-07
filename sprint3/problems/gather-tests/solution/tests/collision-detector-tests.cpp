@@ -21,8 +21,6 @@ struct StringMaker<collision_detector::GatheringEvent> {
 };
 }  // namespace Catch
 
-// Напишите здесь тесты для функции collision_detector::FindGatherEvents
-
 namespace collision_detector {
 
 class ConcreteItemGathererProvider : public ItemGathererProvider {
