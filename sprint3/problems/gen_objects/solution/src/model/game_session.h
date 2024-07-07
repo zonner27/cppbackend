@@ -29,44 +29,16 @@ public:
     }
 
     void AddDog(std::shared_ptr<Dog> dog, bool randomize_spawn_points);
-    void UpdateDogsCoordinatsByTime(std::chrono::milliseconds time_delta);
+    void UpdateDogsCoordinatsByTime(std::chrono::milliseconds time_delta, std::shared_ptr<Strand>& api_strand);
     const std::string& GetMapName() const noexcept;
     const Map* GetMap() noexcept;
     const Id& GetId() const noexcept;
     const size_t GetDogsCount() const noexcept;
     std::unordered_set<std::shared_ptr<Dog>>& GetDogs() noexcept;    
     std::unordered_set<std::shared_ptr<LostObject>>& GetLostObject() noexcept;
-
-    void UpdateSessionByTime(std::chrono::milliseconds time_delta, std::shared_ptr<Strand>& api_strand) {
-        UpdateDogsCoordinatsByTime(time_delta);
-        UpdateLootGeneration(time_delta, api_strand);
-    }
-
-    size_t GetRandomTypeLostObject() {
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<size_t> dis(0, map_->GetLootTypes().size() - 1);
-
-        return dis(gen);
-    }
-
-    void UpdateLootGeneration(std::chrono::milliseconds time_delta, std::shared_ptr<Strand>& api_strand) {
-        unsigned loot_count = lost_objects_.size();
-        unsigned looter_count = dogs_.size();
-
-        net::dispatch(*api_strand, [self = shared_from_this(), &time_delta, &loot_count, &looter_count]() mutable {
-            unsigned new_loot_count = self->loot_generator_.Generate(time_delta, loot_count, looter_count);
-
-            for (unsigned i = 0; i < new_loot_count; ++i) {
-                auto lost_object = std::make_shared<LostObject>();
-                lost_object->SetCoordinateByPoint(self->map_->GetRandomPointRoadMap());
-                lost_object->SetType(self->GetRandomTypeLostObject());
-                self->lost_objects_.insert(lost_object);
-            }
-        });
-    }
-
-
+    void UpdateSessionByTime(std::chrono::milliseconds time_delta, std::shared_ptr<Strand>& api_strand);
+    size_t GetRandomTypeLostObject();
+    void UpdateLootGeneration(std::chrono::milliseconds time_delta, std::shared_ptr<Strand>& api_strand);
 
 private:
     std::unordered_set<std::shared_ptr<Dog>> dogs_;
