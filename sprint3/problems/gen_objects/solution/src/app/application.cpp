@@ -50,7 +50,7 @@ bool Application::GetRandomizeSpawnPoints() {
 
 void Application::UpdateGameState(const std::chrono::milliseconds &time_delta) {
     for (auto session : game_.GetAllSession()) {
-        session->UpdateSessionByTime(time_delta);
+        session->UpdateSessionByTime(time_delta, api_strand_);
     }
 }
 
