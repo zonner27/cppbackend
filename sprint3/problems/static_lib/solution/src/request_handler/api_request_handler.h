@@ -6,8 +6,6 @@ namespace http_handler {
 
 class ApiRequestHandler : public BaseRequestHandler, public std::enable_shared_from_this<ApiRequestHandler> {
 public:
-    using Strand = net::strand<net::io_context::executor_type>;
-
     using BaseRequestHandler::BaseRequestHandler;
 
     template <typename Body, typename Allocator, typename Send>
@@ -31,7 +29,6 @@ public:
             SendErrorResponse("badRequest", "Bad request", http::status::bad_request, std::forward<Send>(send));
         }
     }
-
 private:
 
     template <typename Send>
