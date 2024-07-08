@@ -15,9 +15,9 @@ void GameSession::AddDog(std::shared_ptr<Dog> dog, bool randomize_spawn_points) 
 void GameSession::UpdateDogsCoordinatsByTime(std::chrono::milliseconds time_delta_ms, std::shared_ptr<Strand>& api_strand){
     int time_delta = static_cast<int>(time_delta_ms.count());
 
-    net::dispatch(*api_strand, [self = shared_from_this(), &time_delta]() {
+    //net::dispatch(*api_strand, [self = shared_from_this(), &time_delta]() {
 
-        for (auto& dog : self->dogs_) {
+        for (auto& dog : dogs_) {
             Coordinates start = dog->GetCoordinate();
             Dimension start_x = static_cast<Dimension>(std::round(start.x));
             Dimension start_y = static_cast<Dimension>(std::round(start.y));
@@ -27,7 +27,7 @@ void GameSession::UpdateDogsCoordinatsByTime(std::chrono::milliseconds time_delt
             constants::Direction direction = dog->GetDirection();
             if (direction == constants::Direction::EAST || direction == constants::Direction::WEST) {
                 finish.y = start.y;
-                if (const Road* road_cur = self->map_->GetHorRoad(start_x, start_y)) {
+                if (const Road* road_cur = map_->GetHorRoad(start_x, start_y)) {
                     if (direction == constants::Direction::EAST) {
                         double road_x_end = static_cast<double>(road_cur->GetEnd().x);
                         if (calc_finish.x - road_x_end <= constants::MAXDISTANCEFROMCENTER) {
@@ -66,7 +66,7 @@ void GameSession::UpdateDogsCoordinatsByTime(std::chrono::milliseconds time_delt
                 }
             } else if (direction == constants::Direction::NORTH || direction == constants::Direction::SOUTH) {
                 finish.x = start.x;
-                if (const Road* road_cur = self->map_->GetVerRoad(start_x, start_y)) {
+                if (const Road* road_cur = map_->GetVerRoad(start_x, start_y)) {
                     if (direction == constants::Direction::SOUTH) {
                         double road_y_end = static_cast<double>(road_cur->GetEnd().y);
                         if (calc_finish.y - road_y_end <= constants::MAXDISTANCEFROMCENTER) {
@@ -106,7 +106,7 @@ void GameSession::UpdateDogsCoordinatsByTime(std::chrono::milliseconds time_delt
             }
             dog->SetCoordinate(finish);
         }
-    });
+    //});
 }
 
 const std::string &model::GameSession::GetMapName() const noexcept {
@@ -146,16 +146,16 @@ void GameSession::UpdateLootGeneration(std::chrono::milliseconds time_delta, std
     unsigned loot_count = lost_objects_.size();
     unsigned looter_count = dogs_.size();
 
-    net::dispatch(*api_strand, [self = shared_from_this(), &time_delta, &loot_count, &looter_count]() {
-        unsigned new_loot_count = self->loot_generator_.Generate(time_delta, loot_count, looter_count);
+    //net::dispatch(*api_strand, [self = shared_from_this(), &time_delta, &loot_count, &looter_count]() {
+        unsigned new_loot_count = loot_generator_.Generate(time_delta, loot_count, looter_count);
 
         for (unsigned i = 0; i < new_loot_count; ++i) {
             auto lost_object = std::make_shared<LostObject>();
-            lost_object->SetCoordinateByPoint(self->map_->GetRandomPointRoadMap());
-            lost_object->SetType(self->GetRandomTypeLostObject());
-            self->lost_objects_.insert(lost_object);
+            lost_object->SetCoordinateByPoint(map_->GetRandomPointRoadMap());
+            lost_object->SetType(GetRandomTypeLostObject());
+            lost_objects_.insert(lost_object);
         }
-    });
+    //});
 }
 
 const GameSession::Id &GameSession::GetId() const noexcept {

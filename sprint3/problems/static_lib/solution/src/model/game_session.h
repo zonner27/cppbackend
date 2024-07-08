@@ -14,7 +14,7 @@ namespace net = boost::asio;
 
 namespace model {
 
-class GameSession : public std::enable_shared_from_this<GameSession> {
+class GameSession {
 public:
 
     using Id = util::Tagged<std::string, Map>;

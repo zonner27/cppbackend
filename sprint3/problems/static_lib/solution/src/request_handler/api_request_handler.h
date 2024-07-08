@@ -118,6 +118,12 @@ private:
                     {"playerId", playerId}
                 };
             });
+//            auto [authToken, playerId] = application_.JoinGame(userName, map);
+
+//            responseBody = {
+//                {"authToken", *authToken},
+//                {"playerId", playerId}
+//            };
 
             SendJsonResponse(responseBody, std::forward<Send>(send));
 
@@ -230,40 +236,43 @@ private:
             boost::json::object players_json;
             boost::json::object lost_objects_json;
 
-            std::vector<std::shared_ptr<model::GameSession>> sessions = application_.GetGame().GetAllSession(); //self->
-            for (std::shared_ptr<model::GameSession>& session : sessions) {
-                for (const std::shared_ptr<model::Dog>& dog : session->GetDogs()) {
-                    boost::json::object dog_json;
-                    dog_json["pos"] = {dog->GetCoordinate().x, dog->GetCoordinate().y};
-                    dog_json["speed"] = {dog->GetSpeed().first, dog->GetSpeed().second};
+            net::dispatch(*application_.GetStrand(), [self = shared_from_this(), req = std::move(req), &players_json, &lost_objects_json, send = std::forward<Send>(send)]() mutable {
 
-                    switch (dog->GetDirection()) {
-                        case constants::Direction::NORTH:
-                            dog_json["dir"] = "U";
-                            break;
-                        case constants::Direction::WEST:
-                            dog_json["dir"] = "L";
-                            break;
-                        case constants::Direction::EAST:
-                            dog_json["dir"] = "R";
-                            break;
-                        case constants::Direction::SOUTH:
-                            dog_json["dir"] = "D";
-                            break;
-                        default:
-                            dog_json["dir"] = "Unknown";
-                            break;
+                std::vector<std::shared_ptr<model::GameSession>> sessions = self->application_.GetGame().GetAllSession();
+                for (std::shared_ptr<model::GameSession>& session : sessions) {
+                    for (const std::shared_ptr<model::Dog>& dog : session->GetDogs()) {
+                        boost::json::object dog_json;
+                        dog_json["pos"] = {dog->GetCoordinate().x, dog->GetCoordinate().y};
+                        dog_json["speed"] = {dog->GetSpeed().first, dog->GetSpeed().second};
+
+                        switch (dog->GetDirection()) {
+                            case constants::Direction::NORTH:
+                                dog_json["dir"] = "U";
+                                break;
+                            case constants::Direction::WEST:
+                                dog_json["dir"] = "L";
+                                break;
+                            case constants::Direction::EAST:
+                                dog_json["dir"] = "R";
+                                break;
+                            case constants::Direction::SOUTH:
+                                dog_json["dir"] = "D";
+                                break;
+                            default:
+                                dog_json["dir"] = "Unknown";
+                                break;
+                        }
+                        players_json[std::to_string(dog->GetId())] = dog_json;
                     }
-                    players_json[std::to_string(dog->GetId())] = dog_json;
-                }
-                for (const std::shared_ptr<model::LostObject>& lost_object: session->GetLostObject()) {
-                    boost::json::object lost_object_json;
-                    lost_object_json["type"] = lost_object->GetType();
-                    lost_object_json["pos"] = {lost_object->GetCoordinate().x, lost_object->GetCoordinate().y};
+                    for (const std::shared_ptr<model::LostObject>& lost_object: session->GetLostObject()) {
+                        boost::json::object lost_object_json;
+                        lost_object_json["type"] = lost_object->GetType();
+                        lost_object_json["pos"] = {lost_object->GetCoordinate().x, lost_object->GetCoordinate().y};
 
-                    lost_objects_json[std::to_string(lost_object->GetId())] = lost_object_json;
+                        lost_objects_json[std::to_string(lost_object->GetId())] = lost_object_json;
+                    }
                 }
-            }
+            });
 
             response_json["players"] = players_json;
             response_json["lostObjects"] = lost_objects_json;
