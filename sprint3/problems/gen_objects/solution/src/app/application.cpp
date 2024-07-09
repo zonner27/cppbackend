@@ -5,7 +5,7 @@ namespace app {
 std::pair<app::Token, app::Player::ID> app::Application::JoinGame(std::string userName, const model::Map *map) {
 
     std::shared_ptr<model::Dog> dog = std::make_shared<model::Dog>(userName);
-    std::shared_ptr<model::GameSession> validSession = game_.FindValidSession(map, tick_period_);
+    std::shared_ptr<model::GameSession> validSession = game_.FindValidSession(map, tick_period_, ioc_);
     validSession->AddDog(dog, randomize_spawn_points_);
     std::shared_ptr<Player> player = std::make_shared<Player>(dog, validSession);
     players_.push_back(player);
@@ -50,7 +50,7 @@ bool Application::GetRandomizeSpawnPoints() {
 
 void Application::UpdateGameState(const std::chrono::milliseconds &time_delta) {
     for (auto session : game_.GetAllSession()) {
-        session->UpdateSessionByTime(time_delta, api_strand_);
+        session->UpdateSessionByTime(time_delta);
     }
 }
 

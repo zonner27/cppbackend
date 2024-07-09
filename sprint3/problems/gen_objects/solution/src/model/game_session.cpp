@@ -1,5 +1,6 @@
 #include "game_session.h"
 
+#include <iostream>  //del
 
 namespace model {
 
@@ -12,7 +13,7 @@ void GameSession::AddDog(std::shared_ptr<Dog> dog, bool randomize_spawn_points) 
     dogs_.insert(dog);
 }
 
-void GameSession::UpdateDogsCoordinatsByTime(std::chrono::milliseconds time_delta_ms, std::shared_ptr<Strand>& api_strand){
+void GameSession::UpdateDogsCoordinatsByTime(std::chrono::milliseconds time_delta_ms){
     int time_delta = static_cast<int>(time_delta_ms.count());
 
     //net::dispatch(*api_strand, [self = shared_from_this(), &time_delta]() {
@@ -129,9 +130,9 @@ std::unordered_set<std::shared_ptr<LostObject> > &GameSession::GetLostObject() n
     return lost_objects_;
 }
 
-void GameSession::UpdateSessionByTime(std::chrono::milliseconds time_delta, std::shared_ptr<Strand> &api_strand) {
-    UpdateDogsCoordinatsByTime(time_delta, api_strand);
-    UpdateLootGeneration(time_delta, api_strand);
+void GameSession::UpdateSessionByTime(std::chrono::milliseconds time_delta) {
+    UpdateDogsCoordinatsByTime(time_delta);
+    UpdateLootGeneration(time_delta);
 }
 
 size_t GameSession::GetRandomTypeLostObject() {
@@ -142,7 +143,7 @@ size_t GameSession::GetRandomTypeLostObject() {
     return dis(gen);
 }
 
-void GameSession::UpdateLootGeneration(std::chrono::milliseconds time_delta, std::shared_ptr<Strand> &api_strand) {
+void GameSession::UpdateLootGeneration(std::chrono::milliseconds time_delta) {
     unsigned loot_count = lost_objects_.size();
     unsigned looter_count = dogs_.size();
 
@@ -155,7 +156,34 @@ void GameSession::UpdateLootGeneration(std::chrono::milliseconds time_delta, std
             lost_object->SetType(GetRandomTypeLostObject());
             lost_objects_.insert(lost_object);
         }
-    //});
+        //});
+}
+
+void GameSession::Run() {
+
+    if(time_update_.count() != 0){
+        ticker_ = std::make_shared<time_tiker::Ticker>(
+            *game_session_strand_,
+            time_update_,
+            [self = shared_from_this()](std::chrono::milliseconds delta) {
+                self->UpdateSessionByTime(delta);
+            }
+        );
+        ticker_->Start();
+    }
+//    [this](std::chrono::milliseconds delta) {
+//        UpdateSessionByTime(delta);
+//    }
+    loot_ticker_ = std::make_shared<time_tiker::Ticker>(
+        *game_session_strand_,
+        loot_generator_.GetPeriod(),
+        [self = shared_from_this()](std::chrono::milliseconds delta) {
+                self->UpdateLootGeneration(delta);
+        }
+    );
+    loot_ticker_->Start();
+
+    std::cout << "loot = " << loot_generator_.GetPeriod().count() << std::endl;
 }
 
 const GameSession::Id &GameSession::GetId() const noexcept {

@@ -35,6 +35,8 @@ public:
      */
     unsigned Generate(TimeInterval time_delta, unsigned loot_count, unsigned looter_count);
 
+    TimeInterval& GetPeriod();
+
 private:
     static double DefaultGenerator() noexcept {
         return 1.0;

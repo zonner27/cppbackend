@@ -110,14 +110,14 @@ private:
 
             json::object responseBody;
 
-            net::dispatch(*application_.GetStrand(), [self = shared_from_this(), &userName, &map, &responseBody, req = std::move(req), send = std::forward<Send>(send)]() mutable {
-                auto [authToken, playerId] = self->application_.JoinGame(userName, map);
+            //net::dispatch(*application_.GetStrand(), [self = shared_from_this(), &userName, &map, &responseBody, req = std::move(req), send = std::forward<Send>(send)]() mutable {
+                auto [authToken, playerId] = application_.JoinGame(userName, map);
 
                 responseBody = {
                     {"authToken", *authToken},
                     {"playerId", playerId}
                 };
-            });
+            //});
 //            auto [authToken, playerId] = application_.JoinGame(userName, map);
 
 //            responseBody = {
@@ -189,7 +189,7 @@ private:
                 const model::Map* map = player->GetSession()->GetMap();
                 double s = map->GetDogSpeed();
 
-                net::dispatch(*application_.GetStrand(), [self = shared_from_this(), &move, &dog, &s, req = std::move(req), send = std::forward<Send>(send)]() mutable {
+                net::dispatch(*player->GetSession()->GetSessionStrand(), [self = shared_from_this(), &move, &dog, &s, req = std::move(req), send = std::forward<Send>(send)]() mutable { //*application_.GetStrand()
 
                     if (move == "L") {
                         dog->SetDirection(constants::Direction::WEST);
@@ -236,43 +236,46 @@ private:
             boost::json::object players_json;
             boost::json::object lost_objects_json;
 
-            net::dispatch(*application_.GetStrand(), [self = shared_from_this(), req = std::move(req), &players_json, &lost_objects_json, send = std::forward<Send>(send)]() mutable {
+            //net::dispatch(*application_.GetStrand(), [self = shared_from_this(), req = std::move(req), &players_json, &lost_objects_json, send = std::forward<Send>(send)]() mutable {
 
-                std::vector<std::shared_ptr<model::GameSession>> sessions = self->application_.GetGame().GetAllSession();
+                std::vector<std::shared_ptr<model::GameSession>> sessions = application_.GetGame().GetAllSession();
                 for (std::shared_ptr<model::GameSession>& session : sessions) {
-                    for (const std::shared_ptr<model::Dog>& dog : session->GetDogs()) {
-                        boost::json::object dog_json;
-                        dog_json["pos"] = {dog->GetCoordinate().x, dog->GetCoordinate().y};
-                        dog_json["speed"] = {dog->GetSpeed().first, dog->GetSpeed().second};
+                    net::dispatch(*session->GetSessionStrand(), [self = shared_from_this(), req = std::move(req), &players_json, &lost_objects_json, &session, send = std::forward<Send>(send)]()  {
 
-                        switch (dog->GetDirection()) {
-                            case constants::Direction::NORTH:
-                                dog_json["dir"] = "U";
-                                break;
-                            case constants::Direction::WEST:
-                                dog_json["dir"] = "L";
-                                break;
-                            case constants::Direction::EAST:
-                                dog_json["dir"] = "R";
-                                break;
-                            case constants::Direction::SOUTH:
-                                dog_json["dir"] = "D";
-                                break;
-                            default:
-                                dog_json["dir"] = "Unknown";
-                                break;
+                        for (const std::shared_ptr<model::Dog>& dog : session->GetDogs()) {
+                            boost::json::object dog_json;
+                            dog_json["pos"] = {dog->GetCoordinate().x, dog->GetCoordinate().y};
+                            dog_json["speed"] = {dog->GetSpeed().first, dog->GetSpeed().second};
+
+                            switch (dog->GetDirection()) {
+                                case constants::Direction::NORTH:
+                                    dog_json["dir"] = "U";
+                                    break;
+                                case constants::Direction::WEST:
+                                    dog_json["dir"] = "L";
+                                    break;
+                                case constants::Direction::EAST:
+                                    dog_json["dir"] = "R";
+                                    break;
+                                case constants::Direction::SOUTH:
+                                    dog_json["dir"] = "D";
+                                    break;
+                                default:
+                                    dog_json["dir"] = "Unknown";
+                                    break;
+                            }
+                            players_json[std::to_string(dog->GetId())] = dog_json;
                         }
-                        players_json[std::to_string(dog->GetId())] = dog_json;
-                    }
-                    for (const std::shared_ptr<model::LostObject>& lost_object: session->GetLostObject()) {
-                        boost::json::object lost_object_json;
-                        lost_object_json["type"] = lost_object->GetType();
-                        lost_object_json["pos"] = {lost_object->GetCoordinate().x, lost_object->GetCoordinate().y};
+                        for (const std::shared_ptr<model::LostObject>& lost_object: session->GetLostObject()) {
+                            boost::json::object lost_object_json;
+                            lost_object_json["type"] = lost_object->GetType();
+                            lost_object_json["pos"] = {lost_object->GetCoordinate().x, lost_object->GetCoordinate().y};
 
-                        lost_objects_json[std::to_string(lost_object->GetId())] = lost_object_json;
-                    }
+                            lost_objects_json[std::to_string(lost_object->GetId())] = lost_object_json;
+                        }
+                    });
                 }
-            });
+            //});
 
             response_json["players"] = players_json;
             response_json["lostObjects"] = lost_objects_json;
@@ -308,9 +311,17 @@ private:
             int time_delta = obj["timeDelta"].as_int64();
             std::chrono::milliseconds delta(time_delta);
 
-            net::dispatch(*application_.GetStrand(), [self = shared_from_this(), &delta,  req = std::move(req), send = std::forward<Send>(send)]() mutable {
-                self->application_.UpdateGameState(delta);
-            });
+            std::vector<std::shared_ptr<model::GameSession>> sessions = application_.GetGame().GetAllSession();
+            for (std::shared_ptr<model::GameSession>& session : sessions) {
+                net::dispatch(*session->GetSessionStrand(), [self = shared_from_this(), &delta, &session, req = std::move(req), send = std::forward<Send>(send)]() mutable {
+                    session->UpdateSessionByTime(delta);
+                    //self->application_.UpdateGameState(delta);
+                });
+            }
+
+//            net::dispatch(*application_.GetStrand(), [self = shared_from_this(), &delta,  req = std::move(req), send = std::forward<Send>(send)]() mutable {
+//                self->application_.UpdateGameState(delta);
+//            });
 
         } catch (const std::exception& e) {
             SendErrorResponse("invalidArgument", "Failed to parse action", http::status::bad_request, std::forward<Send>(send));
