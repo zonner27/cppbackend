@@ -314,14 +314,21 @@ private:
             std::vector<std::shared_ptr<model::GameSession>> sessions = application_.GetGame().GetAllSession();
             for (std::shared_ptr<model::GameSession>& session : sessions) {
                 net::dispatch(*session->GetSessionStrand(), [self = shared_from_this(), &delta, &session, req = std::move(req), send = std::forward<Send>(send)]() mutable {
-                    session->UpdateSessionByTime(delta);
-                    //self->application_.UpdateGameState(delta);
+                    try {
+                        session->UpdateSessionByTime(delta);
+
+                    } catch (const std::exception& e) {
+                        // Ловим исключения std::exception и добавляем информацию о функции
+                        self->SendErrorResponse("internalError", std::string("Exception in UpdateSessionByTime: ") + e.what(), http::status::internal_server_error, std::move(send));
+                        return;
+                    } catch (...) {
+                        // Ловим все остальные исключения и добавляем информацию о функции
+                        self->SendErrorResponse("internalError", "Unknown exception in UpdateSessionByTime", http::status::internal_server_error, std::move(send));
+                        return;
+                    }
                 });
             }
 
-//            net::dispatch(*application_.GetStrand(), [self = shared_from_this(), &delta,  req = std::move(req), send = std::forward<Send>(send)]() mutable {
-//                self->application_.UpdateGameState(delta);
-//            });
 
         } catch (const std::exception& e) {
             SendErrorResponse("invalidArgument", "Failed to parse action", http::status::bad_request, std::forward<Send>(send));

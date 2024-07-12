@@ -13,10 +13,46 @@ void GameSession::AddDog(std::shared_ptr<Dog> dog, bool randomize_spawn_points) 
     dogs_.insert(dog);
 }
 
-void GameSession::UpdateDogsCoordinatsByTime(std::chrono::milliseconds time_delta_ms){
-    int time_delta = static_cast<int>(time_delta_ms.count());
+const std::string &model::GameSession::GetMapName() const noexcept {
+    return map_->GetName();
+}
 
-    //net::dispatch(*api_strand, [self = shared_from_this(), &time_delta]() {
+const Map *GameSession::GetMap() noexcept {
+    return map_;
+}
+
+const size_t GameSession::GetDogsCount() const noexcept {
+    return dogs_.size();
+}
+
+std::unordered_set<std::shared_ptr<Dog> > &GameSession::GetDogs() noexcept {
+    return dogs_;
+}
+
+std::unordered_set<std::shared_ptr<LostObject> > &GameSession::GetLostObject() noexcept {
+    return lost_objects_;
+}
+
+void GameSession::UpdateSessionByTime(const std::chrono::milliseconds& time_delta) {
+     try {
+        UpdateDogsCoordinatsByTime(time_delta);
+        UpdateLootGenerationByTime(time_delta);
+    } catch (const std::exception& e) {
+            // Ловим исключения std::exception и добавляем информацию о функции
+            throw std::runtime_error(std::string("Exception in UpdateSessionByTime: ") + e.what());
+    } catch (...) {
+        // Ловим все остальные исключения и добавляем информацию о функции
+        throw std::runtime_error("Unknown exception in UpdateSessionByTime");
+    }
+}
+
+void GameSession::UpdateDogsCoordinatsByTime(const std::chrono::milliseconds& time_delta_ms){
+
+    try {
+
+        int time_delta = static_cast<int>(time_delta_ms.count());
+
+        //net::dispatch(*game_session_strand_, [self = shared_from_this(), &time_delta]() {
 
         for (auto& dog : dogs_) {
             Coordinates start = dog->GetCoordinate();
@@ -107,33 +143,52 @@ void GameSession::UpdateDogsCoordinatsByTime(std::chrono::milliseconds time_delt
             }
             dog->SetCoordinate(finish);
         }
+
+    } catch (const std::exception& e) {
+           // Ловим исключения std::exception и добавляем информацию о функции
+           throw std::runtime_error(std::string("Exception in UpdateDogsCoordinatsByTime: ") + e.what());
+    } catch (...) {
+       // Ловим все остальные исключения и добавляем информацию о функции
+       throw std::runtime_error("Unknown exception in UpdateDogsCoordinatsByTime");
+    }
+
+}
+
+void GameSession::UpdateLootGenerationByTime(const std::chrono::milliseconds& time_delta) {
+
+    try{
+        unsigned loot_count = lost_objects_.size();
+        unsigned looter_count = dogs_.size();
+
+        if (loot_count < looter_count) {
+            auto lost_object = std::make_shared<LostObject>();
+            lost_object->SetCoordinateByPoint(map_->GetRandomPointRoadMap());
+            lost_object->SetType(GetRandomTypeLostObject());
+            lost_objects_.insert(lost_object);
+        }
+    } catch (const std::exception& e) {
+        // Ловим исключения std::exception и добавляем информацию о функции
+        throw std::runtime_error(std::string("Exception in UpdateLootGenerationByTime: ") + e.what());
+    } catch (...) {
+        // Ловим все остальные исключения и добавляем информацию о функции
+        throw std::runtime_error("Unknown exception in UpdateLootGenerationByTime");
+    }
+
+
+    //net::dispatch(*game_session_strand_, [self = shared_from_this(), &time_delta]() {
     //});
+//    //net::dispatch(*api_strand, [self = shared_from_this(), &time_delta, &loot_count, &looter_count]() {
+//        unsigned new_loot_count = loot_generator_.Generate(time_delta, loot_count, looter_count);
+
+//        for (unsigned i = 0; i < new_loot_count; ++i) {
+//            auto lost_object = std::make_shared<LostObject>();
+//            lost_object->SetCoordinateByPoint(map_->GetRandomPointRoadMap());
+//            lost_object->SetType(GetRandomTypeLostObject());
+//            lost_objects_.insert(lost_object);
+//        }
+//        //});
 }
 
-const std::string &model::GameSession::GetMapName() const noexcept {
-    return map_->GetName();
-}
-
-const Map *GameSession::GetMap() noexcept {
-    return map_;
-}
-
-const size_t GameSession::GetDogsCount() const noexcept {
-    return dogs_.size();
-}
-
-std::unordered_set<std::shared_ptr<Dog> > &GameSession::GetDogs() noexcept {
-    return dogs_;
-}
-
-std::unordered_set<std::shared_ptr<LostObject> > &GameSession::GetLostObject() noexcept {
-    return lost_objects_;
-}
-
-void GameSession::UpdateSessionByTime(std::chrono::milliseconds time_delta) {
-    UpdateDogsCoordinatsByTime(time_delta);
-    UpdateLootGeneration(time_delta);
-}
 
 size_t GameSession::GetRandomTypeLostObject() {
     std::random_device rd;
@@ -143,21 +198,10 @@ size_t GameSession::GetRandomTypeLostObject() {
     return dis(gen);
 }
 
-void GameSession::UpdateLootGeneration(std::chrono::milliseconds time_delta) {
-    unsigned loot_count = lost_objects_.size();
-    unsigned looter_count = dogs_.size();
-
-    //net::dispatch(*api_strand, [self = shared_from_this(), &time_delta, &loot_count, &looter_count]() {
-        unsigned new_loot_count = loot_generator_.Generate(time_delta, loot_count, looter_count);
-
-        for (unsigned i = 0; i < new_loot_count; ++i) {
-            auto lost_object = std::make_shared<LostObject>();
-            lost_object->SetCoordinateByPoint(map_->GetRandomPointRoadMap());
-            lost_object->SetType(GetRandomTypeLostObject());
-            lost_objects_.insert(lost_object);
-        }
-        //});
+std::shared_ptr<GameSession::Strand> GameSession::GetSessionStrand() {
+    return game_session_strand_;
 }
+
 
 void GameSession::Run() {
 
@@ -171,19 +215,17 @@ void GameSession::Run() {
         );
         ticker_->Start();
     }
-//    [this](std::chrono::milliseconds delta) {
-//        UpdateSessionByTime(delta);
-//    }
+
     loot_ticker_ = std::make_shared<time_tiker::Ticker>(
         *game_session_strand_,
         loot_generator_.GetPeriod(),
         [self = shared_from_this()](std::chrono::milliseconds delta) {
-                self->UpdateLootGeneration(delta);
+                self->UpdateLootGenerationByTime(delta);
         }
     );
     loot_ticker_->Start();
 
-    std::cout << "loot = " << loot_generator_.GetPeriod().count() << std::endl;
+    //std::cout << "loot = " << loot_generator_.GetPeriod().count() << std::endl;
 }
 
 const GameSession::Id &GameSession::GetId() const noexcept {
@@ -191,3 +233,7 @@ const GameSession::Id &GameSession::GetId() const noexcept {
 }
 
 }
+
+//    [this](std::chrono::milliseconds delta) {
+//        UpdateSessionByTime(delta);
+//    }

@@ -31,19 +31,20 @@ public:
     }
 
     void AddDog(std::shared_ptr<Dog> dog, bool randomize_spawn_points);
-    void UpdateDogsCoordinatsByTime(std::chrono::milliseconds time_delta);
+
     const std::string& GetMapName() const noexcept;
     const Map* GetMap() noexcept;
     const Id& GetId() const noexcept;
     const size_t GetDogsCount() const noexcept;
     std::unordered_set<std::shared_ptr<Dog>>& GetDogs() noexcept;    
     std::unordered_set<std::shared_ptr<LostObject>>& GetLostObject() noexcept;
-    void UpdateSessionByTime(std::chrono::milliseconds time_delta);
     size_t GetRandomTypeLostObject();
-    void UpdateLootGeneration(std::chrono::milliseconds time_delta);
-    std::shared_ptr<Strand> GetSessionStrand() {
-        return game_session_strand_;
-    }
+
+    void UpdateSessionByTime(const std::chrono::milliseconds& time_delta);
+    void UpdateDogsCoordinatsByTime(const std::chrono::milliseconds& time_delta);
+    void UpdateLootGenerationByTime(const std::chrono::milliseconds& time_delta);
+
+    std::shared_ptr<Strand> GetSessionStrand();
     void Run();
 
 private:
