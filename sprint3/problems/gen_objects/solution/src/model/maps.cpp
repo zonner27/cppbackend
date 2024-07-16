@@ -105,10 +105,10 @@ const double Map::GetDogSpeed() const noexcept{
 }
 
 int Map::GetRandomNumber(int min, int max) {
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(min, max);
-    return dis(gen);
+    std::random_device rd;
+    std::default_random_engine eng(rd());
+    std::uniform_int_distribution<int> distr(min, max);
+    return distr(eng);
 }
 
 Point Map::GetRandomPointOnRoad(const Road &road) const {
