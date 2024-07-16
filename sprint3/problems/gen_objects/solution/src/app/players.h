@@ -18,13 +18,13 @@ public:
     Player(std::shared_ptr<model::Dog> dog, std::shared_ptr<model::GameSession> game_session) : playerId(dog->GetId()), dog_(dog), session_(game_session) {}
 
     ID GetPlayerId() const;
-    std::shared_ptr<model::Dog> GetDog() const;
+    std::weak_ptr<model::Dog> GetDog() const;
     std::shared_ptr<model::GameSession> GetSession() const;
 
 private:
     ID playerId  = 0;
     std::shared_ptr<model::GameSession> session_;
-    std::shared_ptr<model::Dog>  dog_;
+    std::weak_ptr<model::Dog>  dog_;
 };
 
 } // namespace app

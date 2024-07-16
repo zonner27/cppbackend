@@ -6,7 +6,7 @@ Player::ID Player::GetPlayerId() const {
     return playerId;
 }
 
-std::shared_ptr<model::Dog> Player::GetDog() const {
+std::weak_ptr<model::Dog> Player::GetDog() const {
     return dog_;
 }
 

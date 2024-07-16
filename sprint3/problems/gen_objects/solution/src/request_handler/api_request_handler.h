@@ -185,26 +185,26 @@ private:
                 std::string move = obj["move"].as_string().c_str();
                 auto player = application_.GetPlayerTokens().FindPlayerByToken(token);
 
-                std::shared_ptr<model::Dog> dog = player->GetDog();
+                std::weak_ptr<model::Dog> dog = player->GetDog();
                 const model::Map* map = player->GetSession()->GetMap();
                 double s = map->GetDogSpeed();
 
                 net::dispatch(*player->GetSession()->GetSessionStrand(), [self = shared_from_this(), &move, &dog, &s, req = std::move(req), send = std::forward<Send>(send)]() mutable { //*application_.GetStrand()
 
                     if (move == "L") {
-                        dog->SetDirection(constants::Direction::WEST);
-                        dog->SetSpeed({-s, 0});
+                        dog.lock()->SetDirection(constants::Direction::WEST);
+                        dog.lock()->SetSpeed({-s, 0});
                     } else if (move == "R") {
-                        dog->SetDirection(constants::Direction::EAST);
-                        dog->SetSpeed({s, 0});
+                        dog.lock()->SetDirection(constants::Direction::EAST);
+                        dog.lock()->SetSpeed({s, 0});
                     } else if (move == "U") {
-                        dog->SetDirection(constants::Direction::NORTH);
-                        dog->SetSpeed({0, -s});
+                        dog.lock()->SetDirection(constants::Direction::NORTH);
+                        dog.lock()->SetSpeed({0, -s});
                     } else if (move == "D") {
-                        dog->SetDirection(constants::Direction::SOUTH);
-                        dog->SetSpeed({0, s});
+                        dog.lock()->SetDirection(constants::Direction::SOUTH);
+                        dog.lock()->SetSpeed({0, s});
                     } else if (move == "") {
-                        dog->SetSpeed({0, 0});
+                        dog.lock()->SetSpeed({0, 0});
                     } else {
                         self->SendErrorResponse("invalidArgument", "Invalid move value", http::status::bad_request, std::forward<Send>(send));
                         return;
