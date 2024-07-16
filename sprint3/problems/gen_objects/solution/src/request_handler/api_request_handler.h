@@ -144,13 +144,13 @@ private:
         ExecuteAuthorized(req, std::forward<Send>(send), [this, &send](const app::Token& token) {
 
             auto player = application_.GetPlayerTokens().FindPlayerByToken(token);
-            std::shared_ptr<model::GameSession> player_session = player->GetSession();
+            std::weak_ptr<model::GameSession> player_session = player->GetSession();
             boost::json::object response_json;
 
-            for (const std::shared_ptr<model::Dog>& dog : player_session->GetDogs()) {
+            for (const std::weak_ptr<model::Dog>& dog : player_session.lock()->GetDogs()) {      //std::shared_ptr<model::Dog>&
                 boost::json::object dog_json;
-                dog_json["name"] = dog->GetName();
-                response_json[std::to_string(dog->GetId())] = dog_json;
+                dog_json["name"] = dog.lock()->GetName();
+                response_json[std::to_string(dog.lock()->GetId())] = dog_json;
             }
 
             SendJsonResponse(response_json, std::forward<Send>(send));
@@ -186,10 +186,10 @@ private:
                 auto player = application_.GetPlayerTokens().FindPlayerByToken(token);
 
                 std::weak_ptr<model::Dog> dog = player->GetDog();
-                const model::Map* map = player->GetSession()->GetMap();
+                const model::Map* map = player->GetSession().lock()->GetMap();
                 double s = map->GetDogSpeed();
 
-                net::dispatch(*player->GetSession()->GetSessionStrand(), [self = shared_from_this(), &move, &dog, &s, req = std::move(req), send = std::forward<Send>(send)]() mutable { //*application_.GetStrand()
+                net::dispatch(*player->GetSession().lock()->GetSessionStrand(), [self = shared_from_this(), &move, &dog, &s, req = std::move(req), send = std::forward<Send>(send)]() mutable { //*application_.GetStrand()
 
                     if (move == "L") {
                         dog.lock()->SetDirection(constants::Direction::WEST);

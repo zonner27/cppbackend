@@ -17,7 +17,7 @@ std::pair<app::Token, app::Player::ID> app::Application::JoinGame(std::string us
 
 Player *Application::FindByDogNameAndMapId(const std::string &dogName, const std::string &mapId) {
     for (const auto& player : players_) {
-        if (player->GetDog().lock()->GetName() == dogName && *player->GetSession()->GetId() == mapId) {
+        if (player->GetDog().lock()->GetName() == dogName && *player->GetSession().lock()->GetId() == mapId) {
             return player.get();
         }
     }
