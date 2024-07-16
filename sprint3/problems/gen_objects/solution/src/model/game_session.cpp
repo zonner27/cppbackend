@@ -6,7 +6,9 @@ namespace model {
 
 void GameSession::AddDog(std::shared_ptr<Dog> dog, bool randomize_spawn_points) {
     if (randomize_spawn_points) {
-        dog->SetCoordinateByPoint(map_->GetRandomPointRoadMap());
+        Point dog_coord = map_->GetRandomPointRoadMap();
+        //std::cout << "set dog coord = " << dog_coord.x << " y = " << dog_coord.y << std::endl;
+        dog->SetCoordinateByPoint(dog_coord);
     } else {
        dog->SetCoordinateByPoint(map_->GetStartPointRoadMap());
     }
@@ -157,6 +159,8 @@ void GameSession::UpdateDogsCoordinatsByTime(const std::chrono::milliseconds& ti
 void GameSession::UpdateLootGenerationByTime(const std::chrono::milliseconds& time_delta) {
 
     try{
+
+
         unsigned loot_count = lost_objects_.size();
         unsigned looter_count = dogs_.size();
 
@@ -164,7 +168,9 @@ void GameSession::UpdateLootGenerationByTime(const std::chrono::milliseconds& ti
 
         for (unsigned i = 0; i < new_loot_count; ++i) {
             auto lost_object = std::make_shared<LostObject>();
-            lost_object->SetCoordinateByPoint(map_->GetRandomPointRoadMap());
+            Point loot_coord = map_->GetRandomPointRoadMap();
+            //std::cout << "loot x = " << loot_coord.x << " y = " << loot_coord.y << std::endl;
+            lost_object->SetCoordinateByPoint(loot_coord);
             lost_object->SetType(GetRandomTypeLostObject());
             lost_objects_.insert(lost_object);
         }
@@ -178,9 +184,22 @@ void GameSession::UpdateLootGenerationByTime(const std::chrono::milliseconds& ti
     }
 
 
-    //net::dispatch(*game_session_strand_, [self = shared_from_this(), &time_delta]() {
-    //});
-//    //net::dispatch(*api_strand, [self = shared_from_this(), &time_delta, &loot_count, &looter_count]() {
+//    net::dispatch(*game_session_strand_, [self = shared_from_this(), &time_delta]() {
+//            unsigned loot_count = self->lost_objects_.size();
+//            unsigned looter_count = self->dogs_.size();
+
+//            unsigned new_loot_count = self->loot_generator_.Generate(time_delta, loot_count, looter_count);
+
+//            for (unsigned i = 0; i < new_loot_count; ++i) {
+//                auto lost_object = std::make_shared<LostObject>();
+//                Point loot_coord = self->map_->GetRandomPointRoadMap();
+//                //std::cout << "loot x = " << loot_coord.x << " y = " << loot_coord.y << std::endl;
+//                lost_object->SetCoordinateByPoint(loot_coord);
+//                lost_object->SetType(self->GetRandomTypeLostObject());
+//                self->lost_objects_.insert(lost_object);
+//            }
+//    });
+    //net::dispatch(*api_strand, [self = shared_from_this(), &time_delta, &loot_count, &looter_count]() {
 //        unsigned new_loot_count = loot_generator_.Generate(time_delta, loot_count, looter_count);
 
 //        for (unsigned i = 0; i < new_loot_count; ++i) {
@@ -189,7 +208,7 @@ void GameSession::UpdateLootGenerationByTime(const std::chrono::milliseconds& ti
 //            lost_object->SetType(GetRandomTypeLostObject());
 //            lost_objects_.insert(lost_object);
 //        }
-//        //});
+//        });
 }
 
 
