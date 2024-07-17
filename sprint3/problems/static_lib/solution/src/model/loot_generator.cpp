@@ -19,4 +19,8 @@ unsigned LootGenerator::Generate(TimeInterval time_delta, unsigned loot_count,
     return generated_loot;
 }
 
+LootGenerator::TimeInterval &LootGenerator::GetPeriod() {
+    return base_interval_;
+}
+
 } // namespace loot_gen

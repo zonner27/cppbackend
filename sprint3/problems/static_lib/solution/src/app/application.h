@@ -15,7 +15,7 @@ namespace app {
 
 namespace net = boost::asio;
 
-class Application {
+class Application : public std::enable_shared_from_this<Application> {
 
 public:
     using Strand = net::strand<net::io_context::executor_type>;
@@ -27,14 +27,14 @@ public:
         randomize_spawn_points_{randomize_spawn_points},
         api_strand_{std::make_shared<Strand>(net::make_strand(ioc))} {
 
-        if(tick_period_.count() != 0){
-            ticker_ = std::make_shared<time_tiker::Ticker>(
-                *api_strand_,
-                tick_period_,
-                [this](std::chrono::milliseconds delta) { UpdateGameState(delta); }
-            );
-            ticker_->Start();
-        }
+//        if(tick_period_.count() != 0){
+//            ticker_ = std::make_shared<time_tiker::Ticker>(
+//                *api_strand_,
+//                tick_period_,
+//                [this](std::chrono::milliseconds delta) { UpdateGameState(delta); }
+//            );
+//            ticker_->Start();
+//        }
     }
 
     Application(const Application&) = delete;
@@ -61,7 +61,6 @@ private:
     std::vector<std::shared_ptr<Player>> players_;
     PlayerTokens player_tokens_;
     std::shared_ptr<Strand> api_strand_;
-
     std::shared_ptr<time_tiker::Ticker> ticker_;
 
 };
