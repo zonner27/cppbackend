@@ -59,7 +59,7 @@ model::Game LoadGame(const std::filesystem::path& json_path) {
         if (mapData.as_object().contains("bagCapacity")) {
             bagCapacity = mapData.as_object().at("bagCapacity").as_int64();
         }
-        map.SetBagCapacity(bagCapacity);
+        map.SetBagCapaccity(bagCapacity);
 
         try {
             ParseRoads(mapData, map);

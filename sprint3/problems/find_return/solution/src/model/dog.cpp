@@ -48,7 +48,7 @@ void Dog::SetDirection(const constants::Direction &direction) noexcept {
     direction_ = direction;
 }
 
-const std::vector<LostObject> &Dog::GetBag() const {
+const std::vector<LostObject> &Dog::GetBag() const noexcept {
     return bag_;
 }
 

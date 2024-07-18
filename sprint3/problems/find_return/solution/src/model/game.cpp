@@ -25,13 +25,14 @@ std::vector<std::shared_ptr<GameSession> > &Game::GetAllSession() {
     return sessions_;
 }
 
-std::shared_ptr<GameSession> Game::FindValidSession(const Map *map, std::chrono::milliseconds tick_period_) {
+std::shared_ptr<GameSession> Game::FindValidSession(const Map *map, std::chrono::milliseconds tick_period, net::io_context& ioc) {
     for (const auto& session : sessions_) {
         if (session->GetMapName() == map->GetName() && session->GetDogsCount() < constants::MAXPLAYERSINMAP)
             return session;
     }
-    auto newSession = std::make_shared<GameSession>(map, tick_period_, lood_gen_config_);
+    auto newSession = std::make_shared<GameSession>(map, tick_period, lood_gen_config_, ioc);
     AddSession(newSession);
+    newSession->Run();
     return newSession;
 }
 
@@ -54,21 +55,20 @@ const double Game::GetDefaultDogSpeed() {
     return defaultDogSpeed_;
 }
 
+void Game::SetDefaultBagCapacity(int defaultBagCapacity) {
+    defaultBagCapacity_ = defaultBagCapacity;
+}
+
+int Game::GetDefaultBagCapacity() {
+    return defaultBagCapacity_;
+}
+
 void Game::SetLootGeneratorConfig(LootGeneratorConfig &lood_gen_config) {
     lood_gen_config_ = lood_gen_config;
 }
 
 LootGeneratorConfig &Game::GetLootGeneratorConfig() {
     return lood_gen_config_;
-}
-
-void Game::SetDefaultBagCapacity(int defaultBagCapacity){
-    defaultBagCapacity_= defaultBagCapacity;
-    std::cout << "defaultBagCapacity = " << defaultBagCapacity << std::endl;
-}
-
-const int Game::GetDefaultBagCapacity() {
-    return defaultBagCapacity_;
 }
 
 } // namespace model

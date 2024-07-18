@@ -21,7 +21,7 @@ public:
     const constants::Direction& GetDirection() const noexcept;
     void SetDirection(const constants::Direction& direction) noexcept;
 
-    const std::vector<LostObject>& GetBag() const;
+    const std::vector<LostObject>& GetBag() const noexcept;
 
 private:
     std::string name_;

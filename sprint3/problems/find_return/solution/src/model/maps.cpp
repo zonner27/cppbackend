@@ -104,19 +104,19 @@ const double Map::GetDogSpeed() const noexcept{
     return dogSpeed_;
 }
 
-void Map::SetBagCapacity(int bagCapacity) {
+void Map::SetBagCapaccity(int bagCapacity) {
     bagCapacity_ = bagCapacity;
 }
 
-const int Map::GetBagCapacity() const noexcept{
+const int Map::GetBagCapacity() const noexcept {
     return bagCapacity_;
 }
 
 int Map::GetRandomNumber(int min, int max) {
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(min, max);
-    return dis(gen);
+    std::random_device rd;
+    std::default_random_engine eng(rd());
+    std::uniform_int_distribution<int> distr(min, max);
+    return distr(eng);
 }
 
 Point Map::GetRandomPointOnRoad(const Road &road) const {
@@ -126,17 +126,25 @@ Point Map::GetRandomPointOnRoad(const Road &road) const {
     if (road.IsHorizontal()) {
         Dimension random_x;
         if (start.x <=  end.x) {
+            //std::cout << " start.x = " << start.x  << " end.x = " << end.x  << std::endl;
             random_x = GetRandomNumber(start.x, end.x);
+            //std::cout << "random_x = " << random_x <<  std::endl;
         } else {
+            //std::cout << " start.x = " << start.x  << " end.x = " << end.x  << std::endl;
             random_x = GetRandomNumber(end.x, start.x);
+            //std::cout << "random_x = " << random_x << std::endl;
         }
         return {random_x, start.y};
     } else if (road.IsVertical()) {
         Dimension random_y;
-        if (start.x <=  end.x) {
+        if (start.y <=  end.y) {
+            //std::cout << " start.y = " << start.y  << " end.y = " << end.y  << std::endl;
             random_y = GetRandomNumber(start.y, end.y);
+            //std::cout << "random.y = " << random_y  << std::endl;
         } else {
+            //std::cout << " start.y = " << start.y  << " end.y = " << end.y  << std::endl;
             random_y = GetRandomNumber(end.y, start.y);
+            //std::cout << "random.y = " << random_y  << std::endl;
         }
         return {start.x, random_y};
     }

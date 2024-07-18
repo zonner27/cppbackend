@@ -19,7 +19,7 @@ public:
     void AddSession(std::shared_ptr<GameSession> session);
 
     std::vector<std::shared_ptr<GameSession>>& GetAllSession();
-    std::shared_ptr<GameSession> FindValidSession(const Map* map, std::chrono::milliseconds tick_period_);
+    std::shared_ptr<GameSession> FindValidSession(const Map* map, std::chrono::milliseconds tick_period, net::io_context& ioc);
 
     const Maps& GetMaps() const noexcept;
     const Map* FindMap(const Map::Id& id) const noexcept;
@@ -27,11 +27,12 @@ public:
     void SetDefaultDogSpeed(double defaultDogSpeed);
     const double GetDefaultDogSpeed();
 
+    void SetDefaultBagCapacity(int defaultBagCapacity);
+
+    int GetDefaultBagCapacity();
+
     void SetLootGeneratorConfig(LootGeneratorConfig& lood_gen_config);
     LootGeneratorConfig& GetLootGeneratorConfig();
-
-    void SetDefaultBagCapacity(int defaultBagCapacity);
-    const int GetDefaultBagCapacity();
 
 
 private:
