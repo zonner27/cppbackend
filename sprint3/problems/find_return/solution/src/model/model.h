@@ -132,6 +132,7 @@ struct LootType {
     int rotation{std::numeric_limits<int>::min()};
     std::string color{""};
     double scale{std::numeric_limits<double>::quiet_NaN()};
+    int value{std::numeric_limits<int>::min()};
 };
 
 

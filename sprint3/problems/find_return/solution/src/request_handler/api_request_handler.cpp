@@ -89,6 +89,9 @@ json::object ApiRequestHandler::SerializeLootType(const model::LootType &loot_ty
     if (!std::isnan(loot_type.scale)) {
         lootJson[constants::SCALE] = loot_type.scale;
     }
+    if (loot_type.value != std::numeric_limits<int>::min()) {
+        lootJson[constants::VALUE] = loot_type.value;
+    }
     return lootJson;
 }
 

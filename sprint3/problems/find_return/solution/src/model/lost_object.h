@@ -23,6 +23,7 @@ private:
     static uint32_t nextId;
     std::uint32_t id_ {0};
     size_t type_ {0};
+    //std::uint32_t value_{0};
     geom::Point2D coordinates_ {0.0, 0.0};
 
 };

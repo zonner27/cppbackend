@@ -7,9 +7,9 @@ namespace model {
 void GameSession::AddDog(std::shared_ptr<Dog> dog, bool randomize_spawn_points) {
     if (randomize_spawn_points) {
         Point dog_coord = map_->GetRandomPointRoadMap();
-        //std::cout << "set dog coord = " << dog_coord.x << " y = " << dog_coord.y << std::endl;
+        std::cout << "set dog coord = " << dog_coord.x << " y = " << dog_coord.y << std::endl;
         dog->SetCoordinateByPoint(dog_coord);
-    } else {
+    } else {       
        dog->SetCoordinateByPoint(map_->GetStartPointRoadMap());
     }
     dogs_.insert(dog);
@@ -134,6 +134,7 @@ void GameSession::UpdateDogsCoordinatsByTime(const std::chrono::milliseconds& ti
                 }
             }
         }
+        std::cout << "dog finish coord x = " << finish.x << " y = " << finish.y << std::endl;
         dog->SetCoordinate(finish);
     }
 
@@ -149,7 +150,8 @@ void GameSession::UpdateLootGenerationByTime(const std::chrono::milliseconds& ti
     for (unsigned i = 0; i < new_loot_count; ++i) {
         auto lost_object = std::make_shared<LostObject>();
         Point loot_coord = map_->GetRandomPointRoadMap();
-        //std::cout << "loot x = " << loot_coord.x << " y = " << loot_coord.y << std::endl;
+        //Point loot_coord{1, 0}; //del
+        std::cout << "loot x = " << loot_coord.x << " y = " << loot_coord.y << std::endl;
         lost_object->SetCoordinateByPoint(loot_coord);
         lost_object->SetType(GetRandomTypeLostObject());
         lost_objects_.insert(lost_object);
@@ -164,7 +166,6 @@ size_t GameSession::GetRandomTypeLostObject() {
     std::default_random_engine eng(rd());
     std::uniform_int_distribution<size_t> dis(0, map_->GetLootTypes().size() - 1);
     return dis(eng);
-
 
 }
 
@@ -229,6 +230,3 @@ const GameSession::Id &GameSession::GetId() const noexcept {
 
 }
 
-//    [this](std::chrono::milliseconds delta) {
-//        UpdateSessionByTime(delta);
-//    }

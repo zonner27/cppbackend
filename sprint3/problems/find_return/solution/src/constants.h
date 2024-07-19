@@ -34,6 +34,7 @@ namespace constants {
     const std::string ROTATION = "rotation";
     const std::string COLOR = "color";
     const std::string SCALE = "scale";
+    const std::string VALUE = "value";
 
     const std::unordered_map<std::string, std::string> MIME_TYPES = {
         {".htm", "text/html"}, {".html", "text/html"},

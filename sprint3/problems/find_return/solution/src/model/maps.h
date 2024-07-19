@@ -44,6 +44,10 @@ public:
 
     const Point& GetStartPointRoadMap() const noexcept;
 
+    std::uint32_t GetScoreByLootType(size_t id) {
+        return loot_types_[id].value;
+    }
+
 
 private:
     using OfficeIdToIndex = std::unordered_map<Office::Id, size_t, util::TaggedHasher<Office::Id>>;

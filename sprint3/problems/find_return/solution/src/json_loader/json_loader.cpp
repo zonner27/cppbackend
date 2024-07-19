@@ -146,6 +146,9 @@ void ParseLootTypes(const boost::json::value &mapData, model::Map &map) {
         if (lootTypeData.as_object().contains(constants::SCALE)) {
             lootType.scale = lootTypeData.as_object().at(constants::SCALE).as_double();
         }
+        if (lootTypeData.as_object().contains(constants::VALUE)) {
+            lootType.value = lootTypeData.as_object().at(constants::VALUE).as_int64();
+        }
 
         map.AddLootType(lootType);
     }

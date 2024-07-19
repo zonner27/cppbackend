@@ -31,6 +31,18 @@ public:
         bag_.push_back(lostobject);
     }
 
+    void ClearBag() {
+        bag_.clear();
+    }
+
+    void AddScore(std::uint32_t score) {
+        score_ += score;;
+    }
+
+    const uint32_t GetScore() const noexcept{
+        return score_;
+    }
+
     const size_t GetSizeBag() const noexcept {
         return bag_.size();
     }
@@ -46,6 +58,7 @@ private:
     collision_detector::Gatherer gatherer_{{0, 0}, {0, 0}, constants::WIDTH_PLAYER};
     constants::Direction direction_ = constants::Direction::NORTH;
     std::vector<std::shared_ptr<LostObject>> bag_;
+    std::uint32_t score_ = 0;
 };
 
 } // namespace model

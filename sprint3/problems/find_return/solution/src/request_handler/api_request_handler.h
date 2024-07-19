@@ -271,6 +271,7 @@ private:
                             bag_json.push_back(item_json);
                         }
                         dog_json["bag"] = bag_json;
+                        dog_json["score"] = dog->GetScore();
 
                         players_json[std::to_string(dog->GetId())] = dog_json;
                     }
