@@ -12,12 +12,14 @@ const uint32_t Dog::GetId() const noexcept {
     return dog_id;
 }
 
-const Coordinates &Dog::GetCoordinate() const noexcept {
+const geom::Point2D &Dog::GetCoordinate() const noexcept {
     return coordinates_;
 }
 
-void Dog::SetCoordinate(const Coordinates &coordinates) noexcept {
+void Dog::SetCoordinate(const geom::Point2D &coordinates) noexcept {
+    gatherer_.start_pos = coordinates_;
     coordinates_ = coordinates;
+    gatherer_.end_pos = coordinates_;
 }
 
 void Dog::SetCoordinateByPoint(const Point &point) noexcept {
@@ -25,8 +27,8 @@ void Dog::SetCoordinateByPoint(const Point &point) noexcept {
     coordinates_.y = static_cast<double>(point.y);
 }
 
-Coordinates Dog::GetCoordinateByTime(int time_delta) noexcept {
-    Coordinates finish;
+geom::Point2D Dog::GetCoordinateByTime(int time_delta) noexcept {
+    geom::Point2D finish;
     finish.x = coordinates_.x + speed_.first * static_cast<double>(time_delta) / 1000;
     finish.y = coordinates_.y + speed_.second * static_cast<double>(time_delta) / 1000;
     return finish;
@@ -48,8 +50,9 @@ void Dog::SetDirection(const constants::Direction &direction) noexcept {
     direction_ = direction;
 }
 
-const std::vector<LostObject> &Dog::GetBag() const noexcept {
-    return bag_;
+
+const collision_detector::Gatherer &Dog::GetGather() const noexcept{
+    return gatherer_;
 }
 
 } // namespace model

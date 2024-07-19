@@ -60,4 +60,8 @@ namespace constants {
         STOP
     };
 
+    const double WIDTH_ITEM = 0;
+    const double WIDTH_PLAYER = 0.6;
+    const double WIDTH_BASE = 0.5;
+
 }  // namespace constants

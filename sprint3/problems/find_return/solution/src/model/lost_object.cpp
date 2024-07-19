@@ -7,11 +7,11 @@ const uint32_t LostObject::GetId() const noexcept {
     return id_;
 }
 
-const Coordinates &LostObject::GetCoordinate() const noexcept {
+const geom::Point2D &LostObject::GetCoordinate() const noexcept {
     return coordinates_;
 }
 
-void LostObject::SetCoordinate(const Coordinates &coordinates) noexcept {
+void LostObject::SetCoordinate(const geom::Point2D &coordinates) noexcept {
     coordinates_ = coordinates;
 }
 

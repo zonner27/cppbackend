@@ -39,6 +39,8 @@ add_library(GameStaticLib  STATIC
         src/model/lost_object.h
         src/model/game_session.cpp
         src/model/game_session.h
+        src/model/item_gatherer_provider.h
+        src/model/item_gatherer_provider.cpp
 )
 target_include_directories(GameStaticLib PUBLIC src/model)
 target_link_libraries(GameStaticLib PUBLIC ${BOOST_LIB} collision_detection_lib)

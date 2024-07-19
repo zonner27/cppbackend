@@ -264,10 +264,10 @@ private:
                         }
 
                         boost::json::array bag_json;
-                        for (const model::LostObject& item : dog->GetBag()) {
+                        for (const auto& item : dog->GetBag()) {
                             boost::json::object item_json;
-                            item_json["id"] = item.GetId();
-                            item_json["type"] = item.GetType();
+                            item_json["id"] = item->GetId();
+                            item_json["type"] = item->GetType();
                             bag_json.push_back(item_json);
                         }
                         dog_json["bag"] = bag_json;

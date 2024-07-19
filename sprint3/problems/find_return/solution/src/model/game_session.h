@@ -6,6 +6,8 @@
 #include "lost_object.h"
 #include "loot_generator.h"
 #include "../time/ticker.h"
+#include "item_gatherer_provider.h"
+#include "../events/geom.h"
 #include <cmath>
 #include <random>
 #include <boost/asio/strand.hpp>
@@ -43,6 +45,46 @@ public:
     void UpdateSessionByTime(const std::chrono::milliseconds& time_delta);
     void UpdateDogsCoordinatsByTime(const std::chrono::milliseconds& time_delta);
     void UpdateLootGenerationByTime(const std::chrono::milliseconds& time_delta);
+
+    void Collector() {
+        collision_detector::ItemGathererDogProvider provider;
+
+        std::vector<std::shared_ptr<LostObject>> lost_object_refs;
+        std::vector<std::shared_ptr<Dog>> dog_refs;
+
+        for (const auto& lost_object : lost_objects_) {
+             const geom::Point2D coord = lost_object->GetCoordinate();
+            provider.AddItem({coord, constants::WIDTH_ITEM, 0});
+            lost_object_refs.push_back(lost_object);
+        }
+
+        for (const auto& dog : dogs_) {
+            provider.AddGatherer(dog->GetGather());
+            dog_refs.push_back(dog);
+        }
+
+        auto events = collision_detector::FindGatherEvents(provider);
+        for (auto event : events) {
+            collision_detector::Item item = provider.GetItem(event.item_id);
+            //collision_detector::Gatherer gatherer = provider.GetGatherer(event.gatherer_id);
+
+
+            auto dog = dog_refs[event.gatherer_id];
+
+            if (item.type == 0) {
+                auto lost_object = lost_object_refs[event.item_id];
+                if (lost_object == nullptr) {
+                    continue;;
+                }
+                if (dog->GetSizeBag() < map_->GetBagCapacity()) {
+                    dog->AddToBag(lost_object);
+                    //lost_object_refs[event.item_id] = nullptr;
+                    lost_objects_.erase(lost_object);
+                }
+            }
+        }
+
+    }
 
     std::shared_ptr<Strand> GetSessionStrand();
     void Run();

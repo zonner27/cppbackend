@@ -37,6 +37,7 @@ public:
 
     void SetBagCapaccity(int bagCapacity);
     const int GetBagCapacity() const noexcept;
+
     static int GetRandomNumber(int min, int max);
     Point GetRandomPointOnRoad(const Road& road) const;
     Point GetRandomPointRoadMap() const;

@@ -38,6 +38,7 @@ std::unordered_set<std::shared_ptr<LostObject> > &GameSession::GetLostObject() n
 void GameSession::UpdateSessionByTime(const std::chrono::milliseconds& time_delta) {
 
     UpdateDogsCoordinatsByTime(time_delta);
+    Collector();
     //UpdateLootGenerationByTime(time_delta); //del
 
 }
@@ -47,12 +48,12 @@ void GameSession::UpdateDogsCoordinatsByTime(const std::chrono::milliseconds& ti
     int time_delta = static_cast<int>(time_delta_ms.count());
 
     for (auto& dog : dogs_) {
-        Coordinates start = dog->GetCoordinate();
+        geom::Point2D start = dog->GetCoordinate();
         Dimension start_x = static_cast<Dimension>(std::round(start.x));
         Dimension start_y = static_cast<Dimension>(std::round(start.y));
 
-        Coordinates calc_finish = dog->GetCoordinateByTime(time_delta);
-        Coordinates finish;
+        geom::Point2D calc_finish = dog->GetCoordinateByTime(time_delta);
+        geom::Point2D finish;
         constants::Direction direction = dog->GetDirection();
         if (direction == constants::Direction::EAST || direction == constants::Direction::WEST) {
             finish.y = start.y;

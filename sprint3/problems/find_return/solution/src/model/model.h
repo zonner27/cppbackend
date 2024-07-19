@@ -37,10 +37,10 @@ struct Point {
     }
 };
 
-struct Coordinates {
-    double x;
-    double y;
-};
+//struct Coordinates {
+//    double x;
+//    double y;
+//};
 
 
 struct Size {

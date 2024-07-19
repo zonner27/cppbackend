@@ -24,6 +24,7 @@ CollectionResult TryCollectPoint(geom::Point2D a, geom::Point2D b, geom::Point2D
 struct Item {
     geom::Point2D position;
     double width;
+    int type = 0;
 };
 
 struct Gatherer {

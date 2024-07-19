@@ -1,6 +1,9 @@
 #pragma once
 #include "model.h"
 #include "lost_object.h"
+#include "../events/collision_detector.h"
+#include "../events/geom.h"
+#include "../constants.h"
 
 namespace model {
 
@@ -10,10 +13,10 @@ public:
     const std::string& GetName() const noexcept;
     const uint32_t GetId() const noexcept;
 
-    const Coordinates& GetCoordinate() const noexcept;
-    void SetCoordinate(const Coordinates& coordinates) noexcept;
+    const geom::Point2D& GetCoordinate() const noexcept;
+    void SetCoordinate(const geom::Point2D& coordinates) noexcept;
     void SetCoordinateByPoint(const Point& point) noexcept;
-    Coordinates GetCoordinateByTime(int time_delta) noexcept;
+    geom::Point2D GetCoordinateByTime(int time_delta) noexcept;
 
     const std::pair<double, double>& GetSpeed() const noexcept;
     void SetSpeed(const std::pair<double, double>& speed) noexcept;
@@ -21,16 +24,28 @@ public:
     const constants::Direction& GetDirection() const noexcept;
     void SetDirection(const constants::Direction& direction) noexcept;
 
-    const std::vector<LostObject>& GetBag() const noexcept;
+    std::vector<std::shared_ptr<LostObject>> GetBag() const noexcept {
+        return bag_;
+    }
+    void AddToBag(std::shared_ptr<LostObject> lostobject) {
+        bag_.push_back(lostobject);
+    }
+
+    const size_t GetSizeBag() const noexcept {
+        return bag_.size();
+    }
+
+    const collision_detector::Gatherer& GetGather() const noexcept;
 
 private:
     std::string name_;
     static uint32_t nextId;
     std::uint32_t dog_id = 0;
-    Coordinates coordinates_ {0.0, 0.0};
+    geom::Point2D coordinates_ {0.0, 0.0};
     std::pair<double, double> speed_ {0.0, 0.0};
+    collision_detector::Gatherer gatherer_{{0, 0}, {0, 0}, constants::WIDTH_PLAYER};
     constants::Direction direction_ = constants::Direction::NORTH;
-    std::vector<LostObject> bag_;
+    std::vector<std::shared_ptr<LostObject>> bag_;
 };
 
 } // namespace model
