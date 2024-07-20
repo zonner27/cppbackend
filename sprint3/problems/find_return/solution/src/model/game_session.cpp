@@ -38,8 +38,9 @@ std::unordered_set<std::shared_ptr<LostObject> > &GameSession::GetLostObject() n
 void GameSession::UpdateSessionByTime(const std::chrono::milliseconds& time_delta) {
 
     UpdateDogsCoordinatsByTime(time_delta);
+    UpdateLootGenerationByTime(time_delta); //del
     Collector();
-    //UpdateLootGenerationByTime(time_delta); //del
+
 
 }
 
@@ -189,16 +190,16 @@ void GameSession::Run() {
         ticker_->Start();
     }
 
-    loot_ticker_ = std::make_shared<time_tiker::Ticker>(
-        *game_session_strand_,
-        loot_generator_.GetPeriod(),
-        [self_weak = weak_from_this()](std::chrono::milliseconds delta) {
-            if(auto self = self_weak.lock()) {
-                self->UpdateLootGenerationByTime(delta);
-            }
-        }
-    );
-    loot_ticker_->Start();
+//    loot_ticker_ = std::make_shared<time_tiker::Ticker>(
+//        *game_session_strand_,
+//        loot_generator_.GetPeriod(),
+//        [self_weak = weak_from_this()](std::chrono::milliseconds delta) {
+//            if(auto self = self_weak.lock()) {
+//                self->UpdateLootGenerationByTime(delta);
+//            }
+//        }
+//    );
+//    loot_ticker_->Start();
 
 
 //    if(time_update_.count() != 0){
