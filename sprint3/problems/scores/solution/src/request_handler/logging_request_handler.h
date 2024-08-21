@@ -38,7 +38,7 @@ private:
     }
 
     template <typename Body>
-    void LogResponse(const http::response<Body>& resp, long long response_time, const std::string& client_ip) {
+    void LogResponse(const http::response<Body>& resp, int64_t response_time, const std::string& client_ip) {
 
         json::value custom_data = json::object{
                 {"ip"s, client_ip},

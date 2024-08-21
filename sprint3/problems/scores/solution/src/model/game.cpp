@@ -26,10 +26,21 @@ std::vector<std::shared_ptr<GameSession> > &Game::GetAllSession() {
 }
 
 std::shared_ptr<GameSession> Game::FindValidSession(const Map *map, std::chrono::milliseconds tick_period, net::io_context& ioc) {
-    for (const auto& session : sessions_) {
-        if (session->GetMapName() == map->GetName() && session->GetDogsCount() < constants::MAXPLAYERSINMAP)
-            return session;
+
+//    for (const auto& session : sessions_) {
+//        if (session->GetMapName() == map->GetName() && session->GetDogsCount() < constants::MAXPLAYERSINMAP)
+//            return session;
+//    }
+
+    auto it = std::find_if(sessions_.begin(), sessions_.end(),
+        [map](const std::shared_ptr<GameSession>& session) {
+            return session->GetMapName() == map->GetName() && session->GetDogsCount() < constants::MAXPLAYERSINMAP;
+        });
+
+    if (it != sessions_.end()) {
+        return *it;
     }
+
     auto newSession = std::make_shared<GameSession>(map, tick_period, lood_gen_config_, ioc);
     AddSession(newSession);
     newSession->Run();

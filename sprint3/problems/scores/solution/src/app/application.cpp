@@ -15,18 +15,25 @@ std::pair<app::Token, app::Player::ID> app::Application::JoinGame(std::string us
     return make_pair(authToken, playerId);
 }
 
-Player *Application::FindByDogNameAndMapId(const std::string &dogName, const std::string &mapId) {
-    for (const auto& player : players_) {
-        if (player->GetDog().lock()->GetName() == dogName && *player->GetSession().lock()->GetId() == mapId) {
-            return player.get();
-        }
-    }
-    return nullptr;
+Player* Application::FindByDogNameAndMapId(const std::string &dogName, const std::string &mapId) {
+
+    auto it = std::find_if(players_.begin(), players_.end(),
+           [&dogName, &mapId](const std::shared_ptr<Player>& player) {
+               auto dog = player->GetDog().lock();
+               auto session = player->GetSession().lock();
+               return dog && session && dog->GetName() == dogName && *session->GetId() == mapId;
+           });
+
+    return it != players_.end() ? it->get() : nullptr;
+
+//    for (const auto& player : players_) {
+//        if (player->GetDog().lock()->GetName() == dogName && *player->GetSession().lock()->GetId() == mapId) {
+//            return player.get();
+//        }
+//    }
+//    return nullptr;
 }
 
-std::vector<std::shared_ptr<Player> > &Application::GetPlayers() {
-    return players_;
-}
 
 PlayerTokens &Application::GetPlayerTokens(){
     return player_tokens_;

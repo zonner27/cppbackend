@@ -27,7 +27,7 @@ void Dog::SetCoordinateByPoint(const Point &point) noexcept {
     coordinates_.y = static_cast<double>(point.y);
 }
 
-geom::Point2D Dog::GetCoordinateByTime(int time_delta) noexcept {
+const geom::Point2D Dog::GetCoordinateByTime(int time_delta) const noexcept {
     geom::Point2D finish;
     finish.x = coordinates_.x + speed_.first * static_cast<double>(time_delta) / 1000;
     finish.y = coordinates_.y + speed_.second * static_cast<double>(time_delta) / 1000;

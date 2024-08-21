@@ -178,22 +178,23 @@ private:
 
                 std::weak_ptr<model::Dog> dog = player->GetDog();
                 const model::Map* map = player->GetSession().lock()->GetMap();
-                double s = map->GetDogSpeed();
+                double speed = map->GetDogSpeed();
 
-                net::dispatch(*player->GetSession().lock()->GetSessionStrand(), [self = shared_from_this(), &move, &dog, &s, req = std::move(req), send = std::forward<Send>(send)]() mutable { //*application_.GetStrand()
+                net::dispatch(*player->GetSession().lock()->GetSessionStrand(), [self = shared_from_this(),
+                              &move, &dog, &speed, req = std::move(req), send = std::forward<Send>(send)]() mutable {
 
                     if (move == "L") {
                         dog.lock()->SetDirection(constants::Direction::WEST);
-                        dog.lock()->SetSpeed({-s, 0});
+                        dog.lock()->SetSpeed({-speed, 0});
                     } else if (move == "R") {
                         dog.lock()->SetDirection(constants::Direction::EAST);
-                        dog.lock()->SetSpeed({s, 0});
+                        dog.lock()->SetSpeed({speed, 0});
                     } else if (move == "U") {
                         dog.lock()->SetDirection(constants::Direction::NORTH);
-                        dog.lock()->SetSpeed({0, -s});
+                        dog.lock()->SetSpeed({0, -speed});
                     } else if (move == "D") {
                         dog.lock()->SetDirection(constants::Direction::SOUTH);
-                        dog.lock()->SetSpeed({0, s});
+                        dog.lock()->SetSpeed({0, speed});
                     } else if (move == "") {
                         dog.lock()->SetSpeed({0, 0});
                     } else {

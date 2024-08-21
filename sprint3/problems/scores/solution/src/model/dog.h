@@ -9,14 +9,14 @@ namespace model {
 
 class Dog{
 public:
-    Dog(std::string& name) : name_{name}, dog_id{nextId++} {}
+    explicit Dog(std::string& name) : name_{name}, dog_id{nextId++} {}
     const std::string& GetName() const noexcept;
     const uint32_t GetId() const noexcept;
 
     const geom::Point2D& GetCoordinate() const noexcept;
     void SetCoordinate(const geom::Point2D& coordinates) noexcept;
     void SetCoordinateByPoint(const Point& point) noexcept;
-    geom::Point2D GetCoordinateByTime(int time_delta) noexcept;
+    const geom::Point2D GetCoordinateByTime(int time_delta) const noexcept;
 
     const std::pair<double, double>& GetSpeed() const noexcept;
     void SetSpeed(const std::pair<double, double>& speed) noexcept;
