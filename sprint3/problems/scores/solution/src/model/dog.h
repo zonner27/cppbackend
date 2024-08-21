@@ -44,4 +44,5 @@ private:
     std::uint32_t score_ = 0;
 };
 
+
 } // namespace model
