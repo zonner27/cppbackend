@@ -146,10 +146,6 @@ TEST_CASE("FindGatherEvents 2 gather", "[FindGatherEvents]") {
 
     auto events = collision_detector::FindGatherEvents(provider);
 
-//    for (const auto& event : events) {
-//       std::cout << Catch::StringMaker<collision_detector::GatheringEvent>::convert(event) << std::endl;
-//    }
-
     CHECK(events[0].gatherer_id == 1);
     CHECK(events[1].gatherer_id == 0);
     CHECK(events[2].gatherer_id == 1);

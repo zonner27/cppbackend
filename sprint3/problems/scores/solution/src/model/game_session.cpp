@@ -1,13 +1,10 @@
 #include "game_session.h"
 
-#include <iostream>  //del
-
 namespace model {
 
 void GameSession::AddDog(std::shared_ptr<Dog> dog, bool randomize_spawn_points) {
     if (randomize_spawn_points) {
         Point dog_coord = map_->GetRandomPointRoadMap();
-        std::cout << "set dog coord = " << dog_coord.x << " y = " << dog_coord.y << std::endl;
         dog->SetCoordinateByPoint(dog_coord);
     } else {       
        dog->SetCoordinateByPoint(map_->GetStartPointRoadMap());
@@ -38,10 +35,8 @@ std::unordered_set<std::shared_ptr<LostObject> > &GameSession::GetLostObject() n
 void GameSession::UpdateSessionByTime(const std::chrono::milliseconds& time_delta) {
 
     UpdateDogsCoordinatsByTime(time_delta);
-    UpdateLootGenerationByTime(time_delta); //del
+    UpdateLootGenerationByTime(time_delta);
     Collector();
-
-
 }
 
 void GameSession::UpdateDogsCoordinatsByTime(const std::chrono::milliseconds& time_delta_ms){
@@ -135,7 +130,6 @@ void GameSession::UpdateDogsCoordinatsByTime(const std::chrono::milliseconds& ti
                 }
             }
         }
-        std::cout << "dog finish coord x = " << finish.x << " y = " << finish.y << std::endl;
         dog->SetCoordinate(finish);
     }
 
@@ -151,8 +145,6 @@ void GameSession::UpdateLootGenerationByTime(const std::chrono::milliseconds& ti
     for (unsigned i = 0; i < new_loot_count; ++i) {
         auto lost_object = std::make_shared<LostObject>();
         Point loot_coord = map_->GetRandomPointRoadMap();
-        //Point loot_coord{1, 0}; //del
-        std::cout << "loot x = " << loot_coord.x << " y = " << loot_coord.y << std::endl;
         lost_object->SetCoordinateByPoint(loot_coord);
         lost_object->SetType(GetRandomTypeLostObject());
         lost_objects_.insert(lost_object);
@@ -160,6 +152,55 @@ void GameSession::UpdateLootGenerationByTime(const std::chrono::milliseconds& ti
 
 }
 
+void GameSession::Collector() {
+    collision_detector::ItemGathererDogProvider provider;
+
+    std::unordered_map<int, std::shared_ptr<LostObject>> lost_object_refs;
+    std::vector<std::shared_ptr<Dog>> dog_refs;
+
+    int id = 0;
+    for (const auto& lost_object : lost_objects_) {
+        const geom::Point2D coord = lost_object->GetCoordinate();
+        provider.AddItem({coord, constants::WIDTH_ITEM, 0});
+        lost_object_refs[id++] = lost_object;
+    }
+
+    for(const auto& office : map_->GetOffices()) {
+        Point coord_point = office.GetPosition();
+        provider.AddItem({{static_cast<double>(coord_point.x), static_cast<double>(coord_point.y)}, constants::WIDTH_BASE, 1});
+    }
+
+    for (const auto& dog : dogs_) {
+        provider.AddGatherer(dog->GetGather());
+        dog_refs.push_back(dog);
+    }
+
+    auto events = collision_detector::FindGatherEvents(provider);
+    for (auto event : events) {
+        collision_detector::Item item = provider.GetItem(event.item_id);
+        auto dog = dog_refs[event.gatherer_id];
+
+        if (item.type == 0) {
+            auto lost_object_it = lost_object_refs.find(event.item_id);
+            if (lost_object_it == lost_object_refs.end() || lost_object_it->second == nullptr) {
+                continue;
+            }
+
+            auto lost_object = lost_object_it->second;
+            if (dog->GetSizeBag() < map_->GetBagCapacity()) {
+                dog->AddToBag(lost_object);
+                lost_object_it->second = nullptr;
+                lost_objects_.erase(lost_object);
+            }
+        } else if (item.type == 1) {
+            for (const auto& lost_obj : dog->GetBag()) {
+                dog->AddScore(lost_obj->GetType());
+            }
+            dog->ClearBag();
+        }
+    }
+
+}
 
 size_t GameSession::GetRandomTypeLostObject() {
 
@@ -167,67 +208,31 @@ size_t GameSession::GetRandomTypeLostObject() {
     std::default_random_engine eng(rd());
     std::uniform_int_distribution<size_t> dis(0, map_->GetLootTypes().size() - 1);
     return dis(eng);
-
 }
 
 std::shared_ptr<GameSession::Strand> GameSession::GetSessionStrand() {
     return game_session_strand_;
 }
 
-
 void GameSession::Run() {
 
     if(time_update_.count() != 0) {
         ticker_ = std::make_shared<time_tiker::Ticker>(
-            *game_session_strand_,
-            time_update_,
-            [self_weak = weak_from_this()](std::chrono::milliseconds delta) {
-                if(auto self = self_weak.lock()) {
-                    self->UpdateSessionByTime(delta);
-                }
+                    *game_session_strand_,
+                    time_update_,
+                    [self_weak = weak_from_this()](std::chrono::milliseconds delta) {
+            if(auto self = self_weak.lock()) {
+                self->UpdateSessionByTime(delta);
             }
+        }
         );
         ticker_->Start();
     }
-
-//    loot_ticker_ = std::make_shared<time_tiker::Ticker>(
-//        *game_session_strand_,
-//        loot_generator_.GetPeriod(),
-//        [self_weak = weak_from_this()](std::chrono::milliseconds delta) {
-//            if(auto self = self_weak.lock()) {
-//                self->UpdateLootGenerationByTime(delta);
-//            }
-//        }
-//    );
-//    loot_ticker_->Start();
-
-
-//    if(time_update_.count() != 0){
-//        ticker_ = std::make_shared<time_tiker::Ticker>(
-//            *game_session_strand_,
-//            time_update_,
-//            [self = shared_from_this()](std::chrono::milliseconds delta) {
-//                self->UpdateSessionByTime(delta);
-//            }
-//        );
-//        ticker_->Start();
-//    }
-
-//    loot_ticker_ = std::make_shared<time_tiker::Ticker>(
-//        *game_session_strand_,
-//        loot_generator_.GetPeriod(),
-//        [self = shared_from_this()](std::chrono::milliseconds delta) {
-//                self->UpdateLootGenerationByTime(delta);
-//        }
-//    );
-//    loot_ticker_->Start();
-
-    //std::cout << "loot = " << loot_generator_.GetPeriod().count() << std::endl;
 }
 
 const GameSession::Id &GameSession::GetId() const noexcept {
     return map_->GetId();
 }
 
-}
+} //namespace model
 

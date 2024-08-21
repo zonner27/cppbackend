@@ -43,11 +43,7 @@ public:
     Point GetRandomPointRoadMap() const;
 
     const Point& GetStartPointRoadMap() const noexcept;
-
-    std::uint32_t GetScoreByLootType(size_t id) {
-        return loot_types_[id].value;
-    }
-
+    std::uint32_t GetScoreByLootType(size_t id);
 
 private:
     using OfficeIdToIndex = std::unordered_map<Office::Id, size_t, util::TaggedHasher<Office::Id>>;
@@ -62,7 +58,6 @@ private:
     LootTypes loot_types_;
     double dogSpeed_;
     int bagCapacity_;
-
 
     OfficeIdToIndex warehouse_id_to_index_;
     Offices offices_;

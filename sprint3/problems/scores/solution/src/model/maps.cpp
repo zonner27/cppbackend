@@ -126,25 +126,17 @@ Point Map::GetRandomPointOnRoad(const Road &road) const {
     if (road.IsHorizontal()) {
         Dimension random_x;
         if (start.x <=  end.x) {
-            //std::cout << " start.x = " << start.x  << " end.x = " << end.x  << std::endl;
             random_x = GetRandomNumber(start.x, end.x);
-            //std::cout << "random_x = " << random_x <<  std::endl;
         } else {
-            //std::cout << " start.x = " << start.x  << " end.x = " << end.x  << std::endl;
             random_x = GetRandomNumber(end.x, start.x);
-            //std::cout << "random_x = " << random_x << std::endl;
         }
         return {random_x, start.y};
     } else if (road.IsVertical()) {
         Dimension random_y;
         if (start.y <=  end.y) {
-            //std::cout << " start.y = " << start.y  << " end.y = " << end.y  << std::endl;
             random_y = GetRandomNumber(start.y, end.y);
-            //std::cout << "random.y = " << random_y  << std::endl;
         } else {
-            //std::cout << " start.y = " << start.y  << " end.y = " << end.y  << std::endl;
             random_y = GetRandomNumber(end.y, start.y);
-            //std::cout << "random.y = " << random_y  << std::endl;
         }
         return {start.x, random_y};
     }
@@ -164,6 +156,8 @@ const Point &Map::GetStartPointRoadMap() const noexcept{
     return start_roads_point_;
 }
 
-
+uint32_t Map::GetScoreByLootType(size_t id) {
+    return loot_types_[id].value;
+}
 
 } // namespace model

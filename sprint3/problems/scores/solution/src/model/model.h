@@ -37,12 +37,6 @@ struct Point {
     }
 };
 
-//struct Coordinates {
-//    double x;
-//    double y;
-//};
-
-
 struct Size {
     Dimension width, height;
 };
@@ -134,6 +128,5 @@ struct LootType {
     double scale{std::numeric_limits<double>::quiet_NaN()};
     int value{std::numeric_limits<int>::min()};
 };
-
 
 }  // namespace model

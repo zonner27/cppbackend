@@ -27,11 +27,7 @@ std::shared_ptr<Player> PlayerTokens::FindPlayerByToken(const Token &token) {
     return nullptr;
 }
 
-void PlayerTokens::PrintToken() {
-    for (const auto& token : token_to_player_) {
-        std::cout << *token.first << std::endl;
-    }
-}
+
 
 
 }   //namepsace app

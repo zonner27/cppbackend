@@ -23,4 +23,8 @@ LootGenerator::TimeInterval &LootGenerator::GetPeriod() {
     return base_interval_;
 }
 
+double LootGenerator::DefaultGenerator() noexcept {
+    return 1.0;
+}
+
 } // namespace loot_gen

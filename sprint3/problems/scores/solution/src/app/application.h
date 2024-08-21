@@ -25,17 +25,7 @@ public:
         ioc_{ioc},
         tick_period_{tick_period},
         randomize_spawn_points_{randomize_spawn_points},
-        api_strand_{std::make_shared<Strand>(net::make_strand(ioc))} {
-
-//        if(tick_period_.count() != 0){
-//            ticker_ = std::make_shared<time_tiker::Ticker>(
-//                *api_strand_,
-//                tick_period_,
-//                [this](std::chrono::milliseconds delta) { UpdateGameState(delta); }
-//            );
-//            ticker_->Start();
-//        }
-    }
+        api_strand_{std::make_shared<Strand>(net::make_strand(ioc))} {}
 
     Application(const Application&) = delete;
     Application& operator=(const Application&) = delete;
@@ -50,7 +40,6 @@ public:
     std::shared_ptr<Strand> GetStrand();
     std::chrono::milliseconds GetTickPeriod();
     bool GetRandomizeSpawnPoints();
-
     void UpdateGameState(const std::chrono::milliseconds& time_delta);
 
 private:
@@ -64,6 +53,5 @@ private:
     std::shared_ptr<time_tiker::Ticker> ticker_;
 
 };
-
 
 } //namespace app

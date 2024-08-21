@@ -24,29 +24,12 @@ public:
     const constants::Direction& GetDirection() const noexcept;
     void SetDirection(const constants::Direction& direction) noexcept;
 
-    std::vector<std::shared_ptr<LostObject>> GetBag() const noexcept {
-        return bag_;
-    }
-    void AddToBag(std::shared_ptr<LostObject> lostobject) {
-        bag_.push_back(lostobject);
-    }
-
-    void ClearBag() {
-        bag_.clear();
-    }
-
-    void AddScore(std::uint32_t score) {
-        score_ += score;;
-    }
-
-    const uint32_t GetScore() const noexcept{
-        return score_;
-    }
-
-    const size_t GetSizeBag() const noexcept {
-        return bag_.size();
-    }
-
+    std::vector<std::shared_ptr<LostObject>> GetBag() const noexcept;
+    void AddToBag(std::shared_ptr<LostObject> lostobject);
+    void ClearBag();
+    const size_t GetSizeBag() const noexcept;
+    void AddScore(std::uint32_t score);
+    const uint32_t GetScore() const noexcept;
     const collision_detector::Gatherer& GetGather() const noexcept;
 
 private:

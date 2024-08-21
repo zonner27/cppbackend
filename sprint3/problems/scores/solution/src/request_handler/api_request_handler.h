@@ -109,21 +109,12 @@ private:
             }
 
             json::object responseBody;
+            auto [authToken, playerId] = application_.JoinGame(userName, map);
 
-            //net::dispatch(*application_.GetStrand(), [self = shared_from_this(), &userName, &map, &responseBody, req = std::move(req), send = std::forward<Send>(send)]() mutable {
-                auto [authToken, playerId] = application_.JoinGame(userName, map);
-
-                responseBody = {
-                    {"authToken", *authToken},
-                    {"playerId", playerId}
-                };
-            //});
-//            auto [authToken, playerId] = application_.JoinGame(userName, map);
-
-//            responseBody = {
-//                {"authToken", *authToken},
-//                {"playerId", playerId}
-//            };
+            responseBody = {
+                {"authToken", *authToken},
+                {"playerId", playerId}
+            };
 
             SendJsonResponse(responseBody, std::forward<Send>(send));
 
@@ -285,10 +276,8 @@ private:
                 });
             }
 
-
             response_json["players"] = players_json;
             response_json["lostObjects"] = lost_objects_json;
-
             SendJsonResponse(response_json, std::forward<Send>(send));
         });
     }
@@ -323,21 +312,9 @@ private:
             std::vector<std::shared_ptr<model::GameSession>> sessions = application_.GetGame().GetAllSession();
             for (std::shared_ptr<model::GameSession>& session : sessions) {
                 net::dispatch(*session->GetSessionStrand(), [self = shared_from_this(), &delta, &session, req = std::move(req), send = std::forward<Send>(send)]() mutable {
-                    try {
-                        session->UpdateSessionByTime(delta);
-
-                    } catch (const std::exception& e) {
-                        // Ловим исключения std::exception и добавляем информацию о функции
-                        self->SendErrorResponse("internalError", std::string("Exception in UpdateSessionByTime: ") + e.what(), http::status::internal_server_error, std::move(send));
-                        return;
-                    } catch (...) {
-                        // Ловим все остальные исключения и добавляем информацию о функции
-                        self->SendErrorResponse("internalError", "Unknown exception in UpdateSessionByTime", http::status::internal_server_error, std::move(send));
-                        return;
-                    }
+                    session->UpdateSessionByTime(delta);
                 });
             }
-
 
         } catch (const std::exception& e) {
             SendErrorResponse("invalidArgument", "Failed to parse action", http::status::bad_request, std::forward<Send>(send));

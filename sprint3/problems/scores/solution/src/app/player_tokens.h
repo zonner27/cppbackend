@@ -17,7 +17,6 @@ public:
     Token GenerateToken();
     Token AddPlayer(std::shared_ptr<Player> player);
     std::shared_ptr<Player> FindPlayerByToken(const Token& token);
-    void PrintToken();
 
 private:
 

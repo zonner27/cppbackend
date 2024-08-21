@@ -50,6 +50,29 @@ void Dog::SetDirection(const constants::Direction &direction) noexcept {
     direction_ = direction;
 }
 
+std::vector<std::shared_ptr<LostObject> > Dog::GetBag() const noexcept {
+    return bag_;
+}
+
+void Dog::AddToBag(std::shared_ptr<LostObject> lostobject) {
+    bag_.push_back(lostobject);
+}
+
+void Dog::ClearBag() {
+    bag_.clear();
+}
+
+void Dog::AddScore(uint32_t score) {
+    score_ += score;;
+}
+
+const uint32_t Dog::GetScore() const noexcept{
+    return score_;
+}
+
+const size_t Dog::GetSizeBag() const noexcept {
+    return bag_.size();
+}
 
 const collision_detector::Gatherer &Dog::GetGather() const noexcept{
     return gatherer_;

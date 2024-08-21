@@ -22,7 +22,8 @@ CollectionResult TryCollectPoint(geom::Point2D a, geom::Point2D b, geom::Point2D
     return CollectionResult(sq_distance, proj_ratio);
 }
 
-static CollectionResult TryCollectPoint_Wrong1(geom::Point2D start, geom::Point2D end,
+static CollectionResult TryCollectPoint_Wrong1(geom::Point2D start,
+                                               geom::Point2D end,
                                                geom::Point2D p) {
     double dist, proj;
     if (start.x == end.x) {
@@ -36,9 +37,9 @@ static CollectionResult TryCollectPoint_Wrong1(geom::Point2D start, geom::Point2
     return CollectionResult(dist * dist, proj);
 }
 
-static CollectionResult TryCollectPoint_Wrong2(geom::Point2D start,
-                                                                   geom::Point2D end,
-                                                                   geom::Point2D p) {
+static CollectionResult TryCollectPoint_Wrong2( geom::Point2D start,
+                                                geom::Point2D end,
+                                                geom::Point2D p) {
     double dist, proj;
     if (start.y == end.y) {
         dist = p.y - start.y;

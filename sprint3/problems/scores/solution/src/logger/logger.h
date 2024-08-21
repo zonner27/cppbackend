@@ -11,13 +11,11 @@
 
 #include <string_view>
 
-
 using namespace std::literals;
 namespace logging = boost::log;
 namespace keywords = boost::log::keywords;
 namespace json = boost::json;
 namespace expressions = boost::log::expressions;
-
 
 BOOST_LOG_ATTRIBUTE_KEYWORD(additional_data, "AdditionalData", json::value)
 BOOST_LOG_ATTRIBUTE_KEYWORD(timestamp, "TimeStamp", boost::log::attributes::local_clock::value_type)

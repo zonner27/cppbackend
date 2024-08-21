@@ -11,7 +11,6 @@ struct CollectionResult {
     bool IsCollected(double collect_radius) const {
         return proj_ratio >= 0 && proj_ratio <= 1 && sq_distance <= collect_radius * collect_radius;
     }
-
     // Квадрат расстояния до точки
     double sq_distance;
     // Доля пройденного отрезка

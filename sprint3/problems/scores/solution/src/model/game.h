@@ -28,12 +28,9 @@ public:
     const double GetDefaultDogSpeed();
 
     void SetDefaultBagCapacity(int defaultBagCapacity);
-
     int GetDefaultBagCapacity();
-
     void SetLootGeneratorConfig(LootGeneratorConfig& lood_gen_config);
     LootGeneratorConfig& GetLootGeneratorConfig();
-
 
 private:
     using MapIdHasher = util::TaggedHasher<Map::Id>;
