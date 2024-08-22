@@ -22,9 +22,9 @@ public:
 
     Application(model::Game& game, net::io_context& ioc, uint32_t tick_period, bool randomize_spawn_points) :
         game_{game},
-        ioc_{ioc},
         tick_period_{tick_period},
         randomize_spawn_points_{randomize_spawn_points},
+        ioc_{ioc},
         api_strand_{std::make_shared<Strand>(net::make_strand(ioc))} {
 
 //        if(tick_period_.count() != 0){
