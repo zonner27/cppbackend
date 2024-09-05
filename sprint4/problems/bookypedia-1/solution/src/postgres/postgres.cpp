@@ -42,12 +42,7 @@ std::vector<domain::Author> AuthorRepositoryImpl::GetAllAuthors() {
 
 void BookRepositoryImpl::Save(const domain::Book& book) {
     pqxx::work work_{connection_};
-    std::string title = book.GetTitle();
-    std::cout << "param added book:" << std::endl;
-    std::cout << "book id = " << book.GetId().ToString() << std::endl;
-    std::cout << "aut id = " << book.GetAuthorId().ToString() << std::endl;
-    std::cout << "tile = " << book.GetTitle() << std::endl;
-    std::cout << "year = " << book.GetPublicationYear() << std::endl;
+    //std::string title = book.GetTitle();
     work_.exec_params(R"(
     INSERT INTO books (id, author_id, title, publication_year) VALUES ($1, $2, $3, $4)
         ON CONFLICT (id) DO UPDATE SET author_id=$2, title=$3, publication_year=$4;
@@ -92,30 +87,6 @@ std::vector<domain::Book> BookRepositoryImpl::GetAllBooks() {
     }
     return books;
 }
-
-
-//auto query_text = "SELECT id, author_id, title, publication_year FROM books WHERE author_id=(SELECT id FROM authors WHERE name="
-//    + read_transaction_.quote(author_id)
-//    + " LIMIT 1) ORDER BY publication_year ASC, title ASC";
-//for (auto [id, author_id, title, year] : read_transaction_.query<std::string, std::string, std::string, int>(query_text)) {
-//    books.emplace_back(
-//        domain::BookId::FromString(id),
-//        domain::AuthorId::FromString(author_id),
-//        title,
-//        year
-//    );
-
-//std::optional<domain::Author> AuthorRepositoryImpl::GetAuthorBy(const std::string& author_name) {
-//    pqxx::read_transaction read_transaction_{connection_};
-//    auto query_text = "SELECT * FROM authors WHERE name=" + read_transaction_.quote(author_name);
-//    std::optional tmp_author = read_transaction_.query01<std::string, std::string>(query_text);
-//    if (tmp_author) {
-//        auto [id, name] = *tmp_author;
-//        return domain::Author(domain::AuthorId::FromString(id), name);
-//    };
-//    return std::nullopt;
-//};
-
 
 Database::Database(pqxx::connection connection)
     : connection_{std::move(connection)} {
