@@ -2,7 +2,6 @@
 
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <boost/json.hpp>
 
 #include "../model/model.h"

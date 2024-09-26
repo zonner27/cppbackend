@@ -13,8 +13,6 @@
 #include "../tagged.h"
 #include "../constants.h"
 
-#include <iostream>
-
 namespace model {
 
 using Dimension = int;

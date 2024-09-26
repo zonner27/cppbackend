@@ -3,8 +3,6 @@
 #include <filesystem>
 #include <cassert>
 #include <string>
-
-#include <iostream>
 #include "constants.h"
 
 namespace fs = std::filesystem;

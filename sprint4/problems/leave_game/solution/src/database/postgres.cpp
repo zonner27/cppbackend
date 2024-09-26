@@ -2,7 +2,6 @@
 
 #include <pqxx/zview.hxx>
 #include <pqxx/pqxx>
-#include <iostream>
 #include "../constants.h"
 
 namespace postgres {

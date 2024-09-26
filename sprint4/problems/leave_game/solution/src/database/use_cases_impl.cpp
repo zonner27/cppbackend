@@ -3,8 +3,6 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <string>
 #include <sstream>
-#include <iostream>
-
 
 namespace db_app {
 using namespace domain;
